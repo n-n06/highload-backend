@@ -3,7 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db import get_db
 from src.auth.dependencies import current_active_user
-from src.orders.schemas import OrderCreate, OrderRead, OrderUpdate
+from src.orders.schemas import (
+    OrderCreate, OrderRead, OrderUpdate, OrderPartUpdate
+)
 from src.orders.service import (
     create_order,
     get_all_orders,
@@ -30,12 +32,19 @@ async def create_new_order(
 
 
 @router.get("/", response_model=list[OrderRead])
-async def list_all_orders(db: AsyncSession = Depends(get_db)):
+async def list_all_orders(
+    db: AsyncSession = Depends(get_db),
+    user=Depends(current_active_user)
+):
     return await get_all_orders(db)
 
 
 @router.get("/{order_id}", response_model=OrderRead)
-async def retrieve_order(order_id: int, db: AsyncSession = Depends(get_db)):
+async def retrieve_order(
+    order_id: int, 
+    db: AsyncSession = Depends(get_db),
+    user=Depends(current_active_user)
+):
     return await get_order_by_id(db, order_id)
 
 
@@ -44,30 +53,28 @@ async def update_order(
     order_id: int,
     order_data: OrderUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(current_active_user),
+    user=Depends(current_active_user),
 ):
     return await update_order_info(
         db,
         order_id,
-        delivery_guy_id=order_data.delivery_guy_id,
-        status=order_data.status,
-        current_user=current_user
+        order_data,
+        current_user=user
     )
 
 
 @router.patch("/{order_id}", response_model=OrderRead)
 async def edit_order(
     order_id: int,
-    order_data: OrderUpdate,
+    order_data: OrderPartUpdate,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(current_active_user),
+    user=Depends(current_active_user),
 ):
     return await update_order_info(
         db,
         order_id,
-        delivery_guy_id=order_data.delivery_guy_id,
-        status=order_data.status,
-        current_user=current_user
+        order_data,
+        current_user=user
     )
 
 
@@ -75,6 +82,6 @@ async def edit_order(
 async def deliver_order(
     order_id: int,
     db: AsyncSession = Depends(get_db),
-    current_user=Depends(current_active_user),
+    user=Depends(current_active_user),
 ):
-    return await mark_order_delivered(db, order_id, current_user)
+    return await mark_order_delivered(db, order_id, user)

@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
+from orders.schemas import BaseOrderUpdate
 from src.utils import require_manager, require_delivery_person
 from src.auth.dependencies import current_active_user
 from src.orders.models import Order
@@ -51,17 +52,16 @@ async def get_order_by_id(db: AsyncSession, order_id: int):
 async def update_order_info(
     db: AsyncSession,
     order_id: int,
-    delivery_guy_id: int | None = None,
-    status: str | None = None,
+    order_data: BaseOrderUpdate,
     current_user=Depends(current_active_user),
 ):
     require_manager(current_user) 
     order = await get_order_by_id(db, order_id)
 
-    if delivery_guy_id is not None:
-        order.delivery_guy_id = delivery_guy_id
-    if status is not None:
-        order.status = status
+    for key, value in order_data.model_dump().items():
+        if value is None:
+            continue # skip setting the value 
+        setattr(order, key, value)
 
     db.add(order)
     await db.commit()

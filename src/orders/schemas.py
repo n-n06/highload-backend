@@ -15,11 +15,17 @@ class OrderRead(BaseModel):
 
 
 class OrderCreate(BaseModel):
-    delivery_guy_id: Optional[int]
+    delivery_guy_id: int | None = None
     location_id: int
-    status: Optional[str] = "pending" 
+    status: str | None = "pending" 
 
+class BaseOrderUpdate(BaseModel):
+    pass
 
-class OrderUpdate(BaseModel):
-    delivery_guy_id: Optional[int]
-    status: Optional[str]
+class OrderUpdate(BaseOrderUpdate):
+    delivery_guy_id: int     
+    status: str
+
+class OrderPartUpdate(BaseOrderUpdate):
+    delivery_guy_id: int | None = None
+    status: str | None = None

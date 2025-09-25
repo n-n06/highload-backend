@@ -17,7 +17,7 @@ class ProductUpdate(BaseProductUpdate):
     threshold: int
 
 class ProductPartUpdate(BaseProductUpdate):
-    name: str | None
-    description: str | None
-    stock: int | None
-    threshold: int | None
+    name: str | None = None
+    description: str | None = None
+    stock: int | None = None
+    threshold: int | None = None

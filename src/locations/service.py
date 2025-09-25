@@ -2,10 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
-from locations.schemas import LocationCreate, LocationUpdate
+from locations.schemas import LocationCreate, BaseLocationUpdate
 from src.utils import require_manager, require_superuser
 from src.auth.dependencies import current_active_user
-from src.locations.models import Location, LocationType
+from src.locations.models import Location
 
 
 async def create_location(
@@ -56,7 +56,7 @@ async def get_location_by_id(db: AsyncSession, location_id: int):
 async def update_location_info(
     db: AsyncSession,
     location_id: int,
-    location_data: LocationUpdate,
+    location_data: BaseLocationUpdate,
     user=Depends(current_active_user)
 ):
     require_manager(user) 
@@ -64,11 +64,6 @@ async def update_location_info(
     location = await get_location_by_id(db, location_id)
 
     for key, value in location_data.model_dump().items():
-        if (key == "stock" and value < 0) or (key=="threshold" and value < 0):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Stock or threshold for the product cannot be less than 0"
-            ) 
         if value is None:
             continue # skip setting the value 
         setattr(location, key, value)

@@ -6,7 +6,7 @@ from src.locations.service import (
     create_location, get_all_locations, get_location_by_id, 
     update_location_info, delete_location
 )
-from src.locations.schemas import LocationCreate, LocationRead, LocationUpdate
+from src.locations.schemas import LocationCreate, LocationPartUpdate, LocationRead, LocationUpdate
 from src.locations.models import LocationType
 from src.auth.dependencies import current_active_user
 
@@ -25,7 +25,8 @@ async def create_new_location(
 
 @router.get("/", response_model=list[LocationRead])
 async def list_all_locations(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user=Depends(current_active_user)
 ):
     return await get_all_locations(db)
 
@@ -33,7 +34,8 @@ async def list_all_locations(
 @router.get("/{location_id}", response_model=LocationRead)
 async def retrieve_location(
     location_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    user=Depends(current_active_user)
 ):
     return await get_location_by_id(db, location_id)
 
@@ -51,7 +53,7 @@ async def update_location(
 @router.patch("/{location_id}", response_model=LocationRead)
 async def edit_location(
     location_id: int,
-    location_data: LocationUpdate,
+    location_data: LocationPartUpdate,
     db: AsyncSession = Depends(get_db),
     user=Depends(current_active_user)
 ):

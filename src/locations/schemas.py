@@ -18,6 +18,13 @@ class LocationRead(BaseModel):
     address: str 
     location_type: LocationType = LocationType.WAREHOUSE
 
-class LocationUpdate(BaseModel):
-    name: str 
-    address: str 
+class BaseLocationUpdate(BaseModel):
+    pass
+
+class LocationUpdate(BaseLocationUpdate):
+    name: str
+    address: str
+
+class LocationPartUpdate(BaseLocationUpdate):
+    name: str | None = None
+    address: str | None = None
