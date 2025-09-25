@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
+from locations.schemas import LocationCreate, LocationUpdate
 from src.utils import require_manager, require_superuser
 from src.auth.dependencies import current_active_user
 from src.locations.models import Location, LocationType
@@ -9,22 +10,25 @@ from src.locations.models import Location, LocationType
 
 async def create_location(
     db: AsyncSession,
-    name: str,
-    address: str,
-    location_type: LocationType,
+    location_data: LocationCreate,
     user=Depends(current_active_user)
 ):
     require_superuser(user)  
 
-    result = await db.execute(select(Location).where(Location.name == name))
+    result = await db.execute(
+        select(Location).where(Location.name == location_data.name)
+    )
     existing_location = result.scalars().first()
     if existing_location:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="A location with this name already exists."
+            detail="A location with this name already exists"
         )
 
-    location = Location(name=name, address=address, location_type=location_type)
+    location = Location(
+        name=location_data.name, address=location_data.address, 
+        location_type=location_data.location_type
+    )
     db.add(location)
     await db.commit()
     await db.refresh(location)
@@ -49,24 +53,25 @@ async def get_location_by_id(db: AsyncSession, location_id: int):
     return location
 
 
-async def update_location(
+async def update_location_info(
     db: AsyncSession,
     location_id: int,
-    name: str = None,
-    address: str = None,
-    location_type: LocationType = None,
+    location_data: LocationUpdate,
     user=Depends(current_active_user)
 ):
     require_manager(user) 
 
     location = await get_location_by_id(db, location_id)
 
-    if name:
-        location.name = name
-    if address:
-        location.address = address
-    if location_type:
-        location.location_type = location_type
+    for key, value in location_data.model_dump().items():
+        if (key == "stock" and value < 0) or (key=="threshold" and value < 0):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Stock or threshold for the product cannot be less than 0"
+            ) 
+        if value is None:
+            continue # skip setting the value 
+        setattr(location, key, value)
 
     db.add(location)
     await db.commit()

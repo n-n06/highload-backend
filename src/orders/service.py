@@ -48,7 +48,7 @@ async def get_order_by_id(db: AsyncSession, order_id: int):
     return order
 
 
-async def update_order(
+async def update_order_info(
     db: AsyncSession,
     order_id: int,
     delivery_guy_id: int | None = None,

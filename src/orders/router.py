@@ -8,7 +8,7 @@ from src.orders.service import (
     create_order,
     get_all_orders,
     get_order_by_id,
-    update_order,
+    update_order_info,
     mark_order_delivered,
 )
 
@@ -40,18 +40,34 @@ async def retrieve_order(order_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{order_id}", response_model=OrderRead)
+async def update_order(
+    order_id: int,
+    order_data: OrderUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(current_active_user),
+):
+    return await update_order_info(
+        db,
+        order_id,
+        delivery_guy_id=order_data.delivery_guy_id,
+        status=order_data.status,
+        current_user=current_user
+    )
+
+
+@router.patch("/{order_id}", response_model=OrderRead)
 async def edit_order(
     order_id: int,
     order_data: OrderUpdate,
     db: AsyncSession = Depends(get_db),
     current_user=Depends(current_active_user),
 ):
-    return await update_order(
+    return await update_order_info(
         db,
         order_id,
         delivery_guy_id=order_data.delivery_guy_id,
         status=order_data.status,
-        current_user=current_user,
+        current_user=current_user
     )
 
 
