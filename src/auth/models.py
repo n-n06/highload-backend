@@ -1,5 +1,4 @@
-from fastapi_users.db import SQLAlchemyBaseUserTable
-from sqlalchemy import Integer, Enum
+from sqlalchemy import String, Enum, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db import Base
@@ -7,12 +6,24 @@ from src.auth.schemas import UserRole
 from src.orders.models import Order
 
 
-class User(SQLAlchemyBaseUserTable[int], Base):
+class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    email: Mapped[str] = mapped_column(
+        String(length=320), unique=True, index=True, nullable=False
+    )
+    hashed_password: Mapped[str] = mapped_column(
+        String(length=1024), nullable=False
+    )
     role: Mapped[str] = mapped_column(
         Enum(UserRole), nullable=False, default=UserRole.SALESMAN
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
     )
 
 

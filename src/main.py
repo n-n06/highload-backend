@@ -8,6 +8,7 @@ sys.path.insert(
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from auth.router import auth_router
 from locations.router import router as locations_router
@@ -20,6 +21,10 @@ app.include_router(auth_router)
 app.include_router(locations_router)
 app.include_router(orders_router)
 app.include_router(products_router)
+
+@app.get("/")
+async def redirection():
+    return RedirectResponse("/docs")
 
 if __name__ == "__main__":
     uvicorn.run("src.main:app", reload=True)

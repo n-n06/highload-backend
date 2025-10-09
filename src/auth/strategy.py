@@ -1,9 +1,10 @@
-from fastapi_users import FastAPIUsers
+from fastapi_users import FastAPIUsers, models
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
     JWTStrategy,
 )
+from fastapi_users.jwt import generate_jwt
 
 from src.auth.config import SECRET
 from src.auth.models import User
@@ -13,8 +14,31 @@ from src.auth.manager import get_user_manager
 bearer_transport = BearerTransport(tokenUrl="auth/login")
 
 
+class CustomJWYStrategy(JWTStrategy):
+    def __init__(
+            self, 
+            secret,
+            lifetime_seconds, 
+            token_audience = ..., 
+            algorithm = "HS256", 
+            public_key = None
+        ):
+        super().__init__(secret, lifetime_seconds, token_audience, algorithm, public_key)
+
+    
+    async def write_token(self, user: models.UP) -> str:
+        data = {
+            "sub": str(user.id), "aud": self.token_audience, "role" : user.role.value
+        }
+        return generate_jwt(
+            data, self.encode_key, self.lifetime_seconds, algorithm=self.algorithm
+        )
+
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    return JWTStrategy(
+        secret=SECRET, 
+        lifetime_seconds=3600
+    )
 
 
 auth_backend = AuthenticationBackend(

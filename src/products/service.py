@@ -8,6 +8,7 @@ from src.products.models import Product
 from auth.dependencies import current_active_user
 from auth.schemas import UserRead
 
+
 async def create_product(
         db: AsyncSession, product_data: ProductUpdate, 
         user: UserRead = Depends(current_active_user)
