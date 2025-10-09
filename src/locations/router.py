@@ -8,7 +8,8 @@ from src.locations.service import (
 )
 from src.locations.schemas import LocationCreate, LocationPartUpdate, LocationRead, LocationUpdate
 from src.locations.models import LocationType
-from src.auth.dependencies import current_active_user
+from src.auth.dependencies import current_active_user, has_permissions
+from src.auth.models import UserRole
 
 
 router = APIRouter(prefix="/locations", tags=["Locations"])
@@ -18,7 +19,8 @@ router = APIRouter(prefix="/locations", tags=["Locations"])
 async def create_new_location(
     location_data: LocationCreate,
     db: AsyncSession = Depends(get_db),
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await create_location(db, location_data, user)
 
@@ -45,7 +47,8 @@ async def update_location(
     location_id: int,
     location_data: LocationUpdate,
     db: AsyncSession = Depends(get_db),
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await update_location_info(db, location_id, location_data, user)
 
@@ -55,7 +58,8 @@ async def edit_location(
     location_id: int,
     location_data: LocationPartUpdate,
     db: AsyncSession = Depends(get_db),
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await update_location_info(db, location_id, location_data, user)
 
@@ -64,6 +68,7 @@ async def edit_location(
 async def remove_location(
     location_id: int,
     db: AsyncSession = Depends(get_db),
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await delete_location(db, location_id, user)

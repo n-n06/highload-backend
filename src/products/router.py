@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
+from auth.dependencies import has_permissions
+from auth.schemas import UserRole
 from src.db import get_db
 from src.products.schemas import ProductPartUpdate, ProductRead, ProductUpdate
 from src.products.service import (
@@ -15,7 +17,8 @@ router = APIRouter(prefix="/products", tags=["Products"])
 
 @router.post("/", response_model=ProductRead)
 async def create_new_product(
-    product_data: ProductUpdate, db: AsyncSession = Depends(get_db)
+    product_data: ProductUpdate, db: AsyncSession = Depends(get_db),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await create_product(db=db, product_data=product_data)
 
@@ -35,6 +38,7 @@ async def update_product(
     product_id: int, 
     product_data: ProductUpdate,
     db: AsyncSession = Depends(get_db), 
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await update_product_info(
         db=db, product_id=product_id, product_data=product_data
@@ -46,6 +50,7 @@ async def edit_product(
     product_id: int, 
     product_data: ProductPartUpdate,
     db: AsyncSession = Depends(get_db), 
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     return await update_product_info(
         db=db, product_id=product_id, product_data=product_data
@@ -54,7 +59,8 @@ async def edit_product(
 
 @router.delete("/{product_id}")
 async def delete_product_info(
-    product_id: int, db: AsyncSession = Depends(get_db)
+    product_id: int, db: AsyncSession = Depends(get_db),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     await delete_product(db, product_id)
     return {"detail": f"Product with ID {product_id} deleted successfully."}

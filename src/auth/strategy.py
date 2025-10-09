@@ -14,19 +14,21 @@ from src.auth.manager import get_user_manager
 bearer_transport = BearerTransport(tokenUrl="auth/login")
 
 
-class CustomJWYStrategy(JWTStrategy):
+class CustomJWTStrategy(JWTStrategy):
     def __init__(
-            self, 
-            secret,
-            lifetime_seconds, 
-            token_audience = ..., 
-            algorithm = "HS256", 
-            public_key = None
-        ):
+        self, 
+        secret,
+        lifetime_seconds, 
+        token_audience : list[str] = ["fastapi-users:auth"], 
+        algorithm = "HS256", 
+        public_key = None
+    ):
         super().__init__(secret, lifetime_seconds, token_audience, algorithm, public_key)
 
     
     async def write_token(self, user: models.UP) -> str:
+        role = str(user.role.value)
+
         data = {
             "sub": str(user.id), "aud": self.token_audience, "role" : user.role.value
         }
@@ -34,8 +36,9 @@ class CustomJWYStrategy(JWTStrategy):
             data, self.encode_key, self.lifetime_seconds, algorithm=self.algorithm
         )
 
+
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(
+    return CustomJWTStrategy(
         secret=SECRET, 
         lifetime_seconds=3600
     )

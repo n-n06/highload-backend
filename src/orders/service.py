@@ -15,8 +15,6 @@ async def create_order(
     location_id: int,
     current_user=Depends(current_active_user),
 ):
-    require_manager(current_user) 
-
     await get_location_by_id(db, location_id)  
 
     new_order = Order(
@@ -31,8 +29,12 @@ async def create_order(
     return new_order
 
 
-async def get_all_orders(db: AsyncSession):
-    result = await db.execute(select(Order))
+async def get_all_orders(
+        db: AsyncSession, current_user=Depends(current_active_user)
+):
+    result = await db.execute(
+        select(Order).where(Order.manager_id==current_user.id)
+    )
     return result.scalars().all()
 
 
@@ -55,8 +57,13 @@ async def update_order_info(
     order_data: BaseOrderUpdate,
     current_user=Depends(current_active_user),
 ):
-    require_manager(current_user) 
     order = await get_order_by_id(db, order_id)
+
+    if order.manager_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission denied: cannot update info for this order."
+        )
 
     for key, value in order_data.model_dump().items():
         if value is None:
@@ -74,8 +81,6 @@ async def mark_order_delivered(
     order_id: int,
     current_user=Depends(current_active_user),
 ):
-    require_delivery_person(current_user)  
-
     order = await get_order_by_id(db, order_id)
 
     if order.delivery_guy_id != current_user.id:

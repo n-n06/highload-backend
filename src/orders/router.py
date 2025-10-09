@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from auth.models import User
+from auth.schemas import UserRole
 from src.db import get_db
-from src.auth.dependencies import current_active_user
+from src.auth.dependencies import current_active_user, has_permissions
 from src.orders.schemas import (
     OrderCreate, OrderRead, OrderUpdate, OrderPartUpdate
 )
@@ -22,6 +24,7 @@ async def create_new_order(
     order_data: OrderCreate,
     db: AsyncSession = Depends(get_db),
     current_user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN, UserRole.MANAGER]))
 ):
     return await create_order(
         db,
@@ -34,16 +37,18 @@ async def create_new_order(
 @router.get("/", response_model=list[OrderRead])
 async def list_all_orders(
     db: AsyncSession = Depends(get_db),
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN, UserRole.MANAGER]))
 ):
-    return await get_all_orders(db)
+    return await get_all_orders(db, user)
 
 
 @router.get("/{order_id}", response_model=OrderRead)
 async def retrieve_order(
     order_id: int, 
     db: AsyncSession = Depends(get_db),
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN, UserRole.MANAGER]))
 ):
     return await get_order_by_id(db, order_id)
 
@@ -54,6 +59,7 @@ async def update_order(
     order_data: OrderUpdate,
     db: AsyncSession = Depends(get_db),
     user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN, UserRole.MANAGER]))
 ):
     return await update_order_info(
         db,
@@ -69,6 +75,7 @@ async def edit_order(
     order_data: OrderPartUpdate,
     db: AsyncSession = Depends(get_db),
     user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN, UserRole.MANAGER]))
 ):
     return await update_order_info(
         db,
@@ -83,5 +90,6 @@ async def deliver_order(
     order_id: int,
     db: AsyncSession = Depends(get_db),
     user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.DELIVERY]))
 ):
     return await mark_order_delivered(db, order_id, user)

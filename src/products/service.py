@@ -13,8 +13,6 @@ async def create_product(
         db: AsyncSession, product_data: ProductUpdate, 
         user: UserRead = Depends(current_active_user)
     ):
-    # only superuser can create products in the system
-    require_superuser(user)
 
     if product_data.stock < 0 or product_data.threshold < 0:
         raise HTTPException(
@@ -54,9 +52,6 @@ async def update_product_info(
         user: UserRead = Depends(current_active_user)
     ):
 
-    # only admins can edit product info
-    require_superuser(user)
-
     product = await get_product_by_id(db=db, product_id=product_id)
 
     for key, value in product_data.model_dump().items():
@@ -78,7 +73,6 @@ async def delete_product(
         db: AsyncSession, product_id: int, 
         user: UserRead = Depends(current_active_user)
     ):
-    require_superuser(user)
 
     product = await get_product_by_id(db, product_id)
 

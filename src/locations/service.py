@@ -2,18 +2,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
+from auth.schemas import UserRole
 from locations.schemas import LocationCreate, BaseLocationUpdate
 from src.utils import require_manager, require_superuser
-from src.auth.dependencies import current_active_user
+from src.auth.dependencies import current_active_user, has_permissions
 from src.locations.models import Location
 
 
 async def create_location(
     db: AsyncSession,
     location_data: LocationCreate,
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
-    require_superuser(user)  
 
     result = await db.execute(
         select(Location).where(Location.name == location_data.name)
@@ -57,7 +58,8 @@ async def update_location_info(
     db: AsyncSession,
     location_id: int,
     location_data: BaseLocationUpdate,
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     require_manager(user) 
 
@@ -77,7 +79,8 @@ async def update_location_info(
 async def delete_location(
     db: AsyncSession,
     location_id: int,
-    user=Depends(current_active_user)
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     require_superuser(user)  
     location = await get_location_by_id(db, location_id)
