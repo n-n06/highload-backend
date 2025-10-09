@@ -2,7 +2,6 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.utils import require_superuser
 from src.products.schemas import BaseProductUpdate, ProductUpdate
 from src.products.models import Product
 from auth.dependencies import current_active_user
