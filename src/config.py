@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     DB_NAME: str
     ADMIN_PASS: str
     ADMIN_EMAIL: str
+    LOGSTASH_HOST: str
+    LOGSTASH_PORT: int
 
     @property
     def db_url_async(self) -> str:

@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from auth.dependencies import has_permissions
-from auth.schemas import UserRole
+from src.auth.dependencies import has_permissions
+from src.auth.schemas import UserRole
 from src.db import get_db
 from src.products.schemas import ProductPartUpdate, ProductRead, ProductUpdate
 from src.products.service import (

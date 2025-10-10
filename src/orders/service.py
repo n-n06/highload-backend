@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
-from orders.schemas import BaseOrderUpdate
+from src.orders.schemas import BaseOrderUpdate
 from src.utils import require_manager, require_delivery_person
 from src.auth.dependencies import current_active_user
 from src.orders.models import Order

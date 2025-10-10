@@ -10,7 +10,6 @@ sys.path.insert(
     0, 
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 )
-print(sys.path)
 
 from src.auth.models import Base  
 from src.auth.models import User

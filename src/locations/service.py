@@ -2,8 +2,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
-from auth.schemas import UserRole
-from locations.schemas import LocationCreate, BaseLocationUpdate
+from src.auth.schemas import UserRole
+from src.locations.schemas import LocationCreate, BaseLocationUpdate
 from src.utils import require_manager, require_superuser
 from src.auth.dependencies import current_active_user, has_permissions
 from src.locations.models import Location

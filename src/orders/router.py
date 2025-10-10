@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.schemas import UserRole
+from src.auth.schemas import UserRole
 from src.db import get_db
 from src.auth.dependencies import current_active_user, has_permissions
 from src.orders.schemas import (
