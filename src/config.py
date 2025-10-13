@@ -6,8 +6,6 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASS: str
     DB_NAME: str
-    ADMIN_PASS: str
-    ADMIN_EMAIL: str
     LOGSTASH_HOST: str
     LOGSTASH_PORT: int
 
