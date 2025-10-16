@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-from src.auth.dependencies import has_permissions
-from src.auth.schemas import UserRole
-from src.db import get_db
-from src.products.schemas import ProductPartUpdate, ProductRead, ProductUpdate
-from src.products.service import (
+from src.tmp.auth.dependencies import has_permissions
+from src.tmp.auth.schemas import UserRole
+from src.tmp.db import get_db
+from src.tmp.products.schemas import ProductPartUpdate, ProductRead, ProductUpdate
+from src.tmp.products.service import (
     create_product, get_all_products, get_product_by_id,
     update_product_info, delete_product
 )

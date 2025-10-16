@@ -1,5 +1,5 @@
 
-from src.auth.schemas import UserRead
+from src.tmp.auth.schemas import UserRead
 
 def require_superuser(user: UserRead):
     # TODO: implement later

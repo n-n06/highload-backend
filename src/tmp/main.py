@@ -12,11 +12,11 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
-from src.auth.router import auth_router
-from src.locations.router import router as locations_router
-from src.orders.router import router as orders_router
-from src.products.router import router as products_router
-from src.log.middleware import LogMiddleware
+from src.tmp.auth.router import auth_router
+from src.tmp.locations.router import router as locations_router
+from src.tmp.orders.router import router as orders_router
+from src.tmp.products.router import router as products_router
+from src.tmp.log.middleware import LogMiddleware
 
 
 app = FastAPI()

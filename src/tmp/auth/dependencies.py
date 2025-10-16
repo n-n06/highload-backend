@@ -3,9 +3,9 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.exceptions import HTTPException
 import jwt
 
-from src.auth.strategy import fastapi_users
-from src.auth.models import UserRole
-from src.auth.config import SECRET
+from src import fastapi_users
+from src import UserRole
+from src import SECRET
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")

@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db import get_db
-from src.locations.service import (
+from src import get_db
+from src import (
     create_location, get_all_locations, get_location_by_id, 
     update_location_info, delete_location
 )
-from src.locations.schemas import LocationCreate, LocationPartUpdate, LocationRead, LocationUpdate
-from src.auth.dependencies import current_active_user, has_permissions
-from src.auth.models import UserRole
+from src import LocationCreate, LocationPartUpdate, LocationRead, LocationUpdate
+from src import current_active_user, has_permissions
+from src import UserRole
 
 
 router = APIRouter(prefix="/locations", tags=["Locations"])

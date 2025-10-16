@@ -1,6 +1,6 @@
 import logging.config
 
-from src.config import settings
+from src import settings
 
 LOGSTASH_HOST = settings.LOGSTASH_HOST
 LOGSTASH_PORT = settings.LOGSTASH_PORT

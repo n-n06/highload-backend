@@ -1,5 +1,6 @@
 from logging.config import fileConfig
-import sys, os
+import sys
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -11,13 +12,9 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 )
 
-from src.auth.models import Base  
-from src.auth.models import User
-from src.locations.models import Location
-from src.orders.models import Order
-from src.products.models import Product
+from src import Base
 
-from src.config import settings  
+from src import settings
 
 
 # this is the Alembic Config object, which provides

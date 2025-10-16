@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.schemas import UserRole
-from src.db import get_db
-from src.auth.dependencies import current_active_user, has_permissions
-from src.orders.schemas import (
+from src.tmp.auth.schemas import UserRole
+from src.tmp.db import get_db
+from src.tmp.auth.dependencies import current_active_user, has_permissions
+from src.tmp.orders.schemas import (
     OrderCreate, OrderRead, OrderUpdate, OrderPartUpdate
 )
-from src.orders.service import (
+from src.tmp.orders.service import (
     create_order,
     get_all_orders,
     get_order_by_id,

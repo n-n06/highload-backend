@@ -6,9 +6,9 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.jwt import generate_jwt
 
-from src.auth.config import SECRET
-from src.auth.models import User
-from src.auth.manager import get_user_manager
+from src import SECRET
+from src import User
+from src import get_user_manager
 
 
 bearer_transport = BearerTransport(tokenUrl="auth/login")

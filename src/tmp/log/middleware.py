@@ -5,8 +5,8 @@ from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import Message
 
-from src.log.utils import flatten_dict
-from src.log.logstash import logger
+from src import flatten_dict
+from src import logger
 
 
 class LogMiddleware(BaseHTTPMiddleware):

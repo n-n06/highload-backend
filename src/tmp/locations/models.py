@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Enum
 
-from src.db import Base
-from src.locations.schemas import LocationType
+from src import Base
+from src import LocationType
 
 class Location(Base):
     __tablename__ = "locations"

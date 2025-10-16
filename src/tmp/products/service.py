@@ -2,10 +2,10 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.products.schemas import BaseProductUpdate, ProductUpdate
-from src.products.models import Product
-from src.auth.dependencies import current_active_user
-from src.auth.schemas import UserRead
+from src.tmp.products.schemas import BaseProductUpdate, ProductUpdate
+from src.tmp.products.models import Product
+from src.tmp.auth.dependencies import current_active_user
+from src.tmp.auth.schemas import UserRead
 
 
 async def create_product(
