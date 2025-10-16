@@ -1,27 +1,12 @@
-FROM python:3.11-slim
-
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-ENV PATH="/root/.local/bin:$PATH"
+FROM python:3.11-slim-bookworm
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
-ENV PYTHONPATH=/app
 
-COPY pyproject.toml poetry.lock ./
-COPY README.md /app/
+COPY pyproject.toml .
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-root
+RUN uv sync
 
-COPY src/ /app/src
-COPY .env .
-COPY auth.env .
-COPY alembic.ini .
-COPY alembic/ ./alembic
+ADD . .
 
-COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
-
-EXPOSE 8000
-ENTRYPOINT ["/app/entrypoint.sh"]

@@ -25,7 +25,7 @@ class BaseRepository(BaseRepositoryProtocol):
         result = await self.session.execute(
             select(self.model).offset(offset).limit(limit)
         )
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def create(self, obj: T) -> T:
         self.session.add(obj)
@@ -48,20 +48,20 @@ class BaseRepository(BaseRepositoryProtocol):
             await self.session.commit()
 
 
-class ProductRepository(BaseRepository[Product]):
-    def __init__(self, session):
+class ProductRepository(BaseRepository):
+    def __init__(self, session: AsyncSession):
         super().__init__(session, Product)
 
 
-class UserRepository(BaseRepository[User]):
-    def __init__(self, session):
+class UserRepository(BaseRepository):
+    def __init__(self, session: AsyncSession):
         super().__init__(session, User)
 
 
-class OrderRepository(BaseRepository[Order]):
-    def __init__(self, session):
+class OrderRepository(BaseRepository):
+    def __init__(self, session: AsyncSession):
         super().__init__(session, Order)
 
-class LocationRepository(BaseRepository[Location]):
-    def __init__(self, session):
-        super().__init__(session, Order)
+class LocationRepository(BaseRepository):
+    def __init__(self, session: AsyncSession):
+        super().__init__(session, Location)

@@ -33,6 +33,7 @@ async def create_location(
     db.add(location)
     await db.commit()
     await db.refresh(location)
+
     return location
 
 
