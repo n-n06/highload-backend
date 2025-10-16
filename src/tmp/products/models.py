@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, CheckConstraint
+from sqlalchemy import Column, Integer, String, CheckConstraint
 from src.db import Base
 
 class Product(Base):

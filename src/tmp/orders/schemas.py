@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional
-from src.locations.models import LocationType
 
 
 class OrderRead(BaseModel):

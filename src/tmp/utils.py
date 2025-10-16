@@ -1,6 +1,5 @@
-from fastapi import HTTPException, status
 
-from src.auth.schemas import UserRead, UserRole
+from src.auth.schemas import UserRead
 
 def require_superuser(user: UserRead):
     # TODO: implement later

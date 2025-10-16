@@ -3,7 +3,6 @@ from sqlalchemy.future import select
 from fastapi import Depends, HTTPException, status
 
 from src.orders.schemas import BaseOrderUpdate
-from src.utils import require_manager, require_delivery_person
 from src.auth.dependencies import current_active_user
 from src.orders.models import Order
 from src.locations.service import get_location_by_id

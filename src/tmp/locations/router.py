@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.db import get_db
@@ -7,7 +7,6 @@ from src.locations.service import (
     update_location_info, delete_location
 )
 from src.locations.schemas import LocationCreate, LocationPartUpdate, LocationRead, LocationUpdate
-from src.locations.models import LocationType
 from src.auth.dependencies import current_active_user, has_permissions
 from src.auth.models import UserRole
 

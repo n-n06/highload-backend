@@ -2,7 +2,6 @@ from fastapi_users import schemas
 from pydantic import EmailStr
 
 import enum
-from typing import Optional
 
 class UserRole(enum.Enum):
     ADMIN = "admin"

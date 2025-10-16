@@ -1,5 +1,4 @@
 from typing import Any
-import re
 
 from fastapi import Request, Depends
 from fastapi_users import BaseUserManager, IntegerIDMixin
