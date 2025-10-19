@@ -10,7 +10,6 @@ dependencies = [
     "dishka>=1.7.2",
     "fastapi-users>=14.0.1",
     "fastapi[users]>=0.119.0",
-    "jose>=1.0.0",
     "jwt>=1.4.0",
     "pydantic>=2.12.2",
     "pydantic-settings>=2.11.0",

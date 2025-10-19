@@ -29,3 +29,25 @@ I think it is important to use HTTP methods as they are intended for several rea
 - browsers cache GET requests, so usign POST everywhere would make the API slower
 - PUT and DELETE methods guarantee idempotency (press the button 10 times in a row, but get the same result). If we use POST everywhere, we lose this
 
+
+## Task 2 Answers
+### Какие уязвимости могут возникнуть при хранении JWT на клиентской стороне? 
+- JWT cannot be invalidated before its expiry date. If a token is ever compromised or a user needs to be disconnected immediately, it will be required to:
+    - sep up a server side blacklist
+    - wait for the JWT to expire, which can cause security issues
+- If an attacker gets the JWT and the token is not verified. In this case, it is easy for the attacker to modify the content of the payload. For example, using a different role like 'admin'.  
+- An attacker can simply modify the JOSE header of the JWT, replace the alg field with none, and then freely alter the contents of the token (for example, by giving himself administrator privileges). All without the need for a valid signature.
+- It is possible to brute force the JWT secret and compromise every token if the secret is too easy. 
+- Not good for sessions.
+
+
+### В каких случаях стоит ограничивать время жизни JWT, и какие проблемы это создаёт для UX? 
+- better to use short lived JWT in any case, as it cannot be invalidated before its expire date
+- in apps that can include things like frequent changes to user permissions
+
+When using short lifespans for JWT tokens, the UX can get worse, as users would have to relogin ofter. There is also a chance that if a user goes offlie for a long time, he/she would not be able to refresh their token.  
+
+### Как логирование помогает в расследовании инцидентов безопасности? 
+- all of the actions of the users are recorded, so it is easy to see who did what
+- because we use logging with payloads, we can see every request body
+- with configured visualization like Kibana it is easy to track the number of different requests which can help identify security attacks like DDoS.
