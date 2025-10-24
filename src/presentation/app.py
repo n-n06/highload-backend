@@ -1,14 +1,19 @@
+from dishka import container
 import uvicorn
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI, HTTPException, Response, status
 
 from src.bootstrap.di import setup_di
+from src.infrastructure.logger.middleware import LogMiddleware
 from src.presentation.handlers import router
 
 app = FastAPI()
 
-setup_dishka(setup_di(), app)
+
+container = setup_di()
+setup_dishka(container, app)
 app.include_router(router)
+
 
 @app.get('/health')
 async def health():
