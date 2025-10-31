@@ -1,4 +1,3 @@
-from os import wait
 from sqlalchemy import String, Enum, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

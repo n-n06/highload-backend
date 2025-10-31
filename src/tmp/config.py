@@ -12,8 +12,9 @@ class Settings(BaseSettings):
     @property
     def db_url_async(self) -> str:
         url = f"""
-            postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}
+            postgresql+asyncpg://erp_user:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}
         """
+
         return url.strip() 
 
     model_config = SettingsConfigDict(env_file=".env")
