@@ -8,7 +8,7 @@ from src.infrastructure.logger.middleware import LogMiddleware
 from src.presentation.handlers import router
 
 app = FastAPI()
-
+app.add_middleware(LogMiddleware)
 
 container = setup_di()
 setup_dishka(container, app)

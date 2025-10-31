@@ -8,11 +8,13 @@ from starlette.types import Message
 from src.infrastructure.logger.utils import (
     flatten_dict, sanitize_headers, iterate_in_memory   
 )
+from src.infrastructure.logger.config import setup_logger
 
 class LogMiddleware(BaseHTTPMiddleware):
     """
     Middleware that logs structured json logs 
     """
+    logger = setup_logger()
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
@@ -31,7 +33,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             response: Response = await call_next(request)
             process_time = round((time.time() - start_time) * 1000, 2)
         except Exception as exc:
-            logger.exception("Request failed")
+            LogMiddleware.logger.exception("Request failed: ", exc)
             raise exc
 
         resp_body = b""
@@ -77,7 +79,7 @@ class LogMiddleware(BaseHTTPMiddleware):
 
         log_data.update(flatten_dict(nested_fields, sep="_"))
         
-        logger.info("Request Log", extra=log_data)
+        LogMiddleware.logger.info("Request Log", extra=log_data)
         return response
 
 

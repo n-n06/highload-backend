@@ -4,7 +4,7 @@ from typing import TypeVar, Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from src.infrastructure.db.repositories.protocol import BaseRepositoryProtocol
+from src.domain.protocols.db import BaseRepositoryProtocol
 
 
 T = TypeVar("T")
