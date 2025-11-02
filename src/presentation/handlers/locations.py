@@ -2,21 +2,20 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from dishka.integrations.fastapi import FromDishka, inject
 
-from src.domain.entities import User, UserRole
-from src.application.schemas.locations import LocationCreate, BaseLocationUpdate
-from src.application.schemas.locations import LocationUpdate,LocationResponse
-from src.application.services.locations import LocationService, LocationAuthorizationService
-from src.presentation.dependencies import get_current_active_user
+from src.domain.entities import User
+from src.domain.value_objects.user_roles import UserRole
+from src.presentation.schemas.locations import LocationCreate, BaseLocationUpdate, LocationRead
+from src.application.services.locations import LocationService
+from src.infrastructure.user.dependencies import get_current_active_user, has_permissions
 
 router = APIRouter(
     prefix="/locations",
     tags=["locations"]
 )
 
-
 @router.post(
     "/",
-    response_model=LocationResponse,
+    response_model=LocationRead,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new location"
 )
@@ -24,6 +23,7 @@ router = APIRouter(
 async def create_location(
         location_data: LocationCreate,
         service: FromDishka[LocationService],
+        permissions=Depends(has_permissions([UserRole.ADMIN])),
         current_user: User = Depends(get_current_active_user)
 ):
     """
@@ -32,7 +32,7 @@ async def create_location(
     Requires ADMIN role.
     """
 
-    LocationAuthorizationService.require_admin(current_user)
+    # LocationAuthorizationService.require_admin(current_user)
 
     location = await service.create_location(location_data, current_user)
     return location
@@ -40,7 +40,7 @@ async def create_location(
 
 @router.get(
     "/",
-    response_model=List[LocationResponse],
+    response_model=List[LocationRead],
     summary="Get all locations"
 )
 @inject
@@ -58,7 +58,7 @@ async def get_all_locations(
 
 @router.get(
     "/{location_id}",
-    response_model=LocationResponse,
+    response_model=LocationRead,
     summary="Get location by ID"
 )
 @inject
@@ -72,7 +72,7 @@ async def get_location(
 
 @router.patch(
     "/{location_id}",
-    response_model=LocationResponse,
+    response_model=LocationRead,
     summary="Update location information"
 )
 @inject
@@ -80,7 +80,8 @@ async def update_location(
         location_id: int,
         location_data: BaseLocationUpdate,
         service: FromDishka[LocationService],
-        current_user: User = Depends(get_current_active_user)
+        current_user: User = Depends(get_current_active_user),
+        permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     """
     Update location information.
@@ -88,7 +89,7 @@ async def update_location(
     Requires MANAGER role or higher.
     """
     # Authorization check
-    LocationAuthorizationService.require_manager(current_user)
+    # LocationAuthorizationService.require_manager(current_user)
 
     # Business logic handled by service
     location = await service.update_location(location_id, location_data, current_user)
@@ -104,7 +105,8 @@ async def update_location(
 async def delete_location(
         location_id: int,
         service: FromDishka[LocationService],
-        current_user: User = Depends(get_current_active_user)
+        current_user: User = Depends(get_current_active_user),
+        permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
     """
     Delete a location.
@@ -112,7 +114,7 @@ async def delete_location(
     Requires SUPERUSER role.
     """
     # Authorization check
-    LocationAuthorizationService.require_superuser(current_user)
+    # LocationAuthorizationService.require_superuser(current_user)
 
     # Business logic handled by service
     result = await service.delete_location(location_id, current_user)

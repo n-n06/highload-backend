@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, CheckConstraint
-from src.tmp.db import Base
+
+from src.infrastructure.db.base import Base
 
 class Product(Base):
     __tablename__ = "products"

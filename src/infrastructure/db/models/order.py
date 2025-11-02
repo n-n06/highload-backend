@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from src.tmp.db import Base
+
+from src.infrastructure.db.base import Base
 
 class Order(Base):
     __tablename__ = "orders"

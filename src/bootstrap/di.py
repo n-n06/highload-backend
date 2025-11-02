@@ -1,8 +1,9 @@
 import logging
 
-from dishka import AsyncContainer, Provider, Scope, make_async_container
+from dishka import Container, Provider, Scope, make_container
 from dishka.integrations.fastapi import FastapiProvider
 
+from src.domain.protocols.logger import LoggerProtocol
 from src.infrastructure.db.repositories.base_repo import (
     ProductRepository,
     UserRepository,
@@ -14,8 +15,9 @@ from src.infrastructure.db.dependencies import (
     get_async_sessionmaker,
     get_async_session,
 )
-from src.infrastructure.logger.config import setup_logger
-from src.infrastructure.logger.repositories.logger_repo import LoggingRepository
+from src.infrastructure.logger.logstash_logger import LogstashLogger
+
+
 
 def db_provider()-> Provider:
     provider = Provider()
@@ -52,9 +54,7 @@ def repo_provider() -> Provider:
 
 def logger_provider()-> Provider:
     provider = Provider(scope=Scope.APP)
-    logger = setup_logger()
-    
-    provider.provide(..., provides=LoggerProtocol)
+    provider.provide(LogstashLogger, provides=LoggerProtocol)
 
     return provider
 
@@ -67,8 +67,8 @@ def setup_providers()->list[Provider]:
     ]
 
 
-def setup_di()->AsyncContainer:
-    container = make_async_container(
+def setup_di()->Container:
+    container = make_container(
         *setup_providers(),
         FastapiProvider()
     )
