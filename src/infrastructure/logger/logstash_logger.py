@@ -23,16 +23,16 @@ class LogstashLogger(LoggerProtocol):
         )
         logstash_handler.setLevel(logging.INFO)
 
-        console_formatter = logging.Formatter(
-            "[%(asctime)s] | [%(levelname)s] %(name)s: %(message)s"
-        ) 
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setLevel(logging.INFO)
-        console_handler.setFormatter(console_formatter)
+        # console_formatter = logging.Formatter(
+        #     "[%(asctime)s] | [%(levelname)s] %(name)s: %(message)s"
+        # ) 
+        # console_handler = logging.StreamHandler(sys.stdout)
+        # console_handler.setLevel(logging.INFO)
+        # console_handler.setFormatter(console_formatter)
 
 
         self.logger.addHandler(logstash_handler)
-        self.logger.addHandler(console_handler)
+        # self.logger.addHandler(console_handler)
 
         
     def info(self, message: str, **kwargs: Any) -> None:

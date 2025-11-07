@@ -7,9 +7,6 @@ from src.infrastructure.user.jwt_strategies import (
     fastapi_users, auth_backend
 )
 
-
-
-
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
 

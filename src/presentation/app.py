@@ -16,19 +16,18 @@ sys.path.insert(
 from src.bootstrap.di import setup_di
 from src.domain.protocols.logger import LoggerProtocol
 from src.infrastructure.logger.middleware import LogMiddleware
-from src.presentation.handlers import router
 from src.presentation.handlers.users import auth_router
+
 
 app = FastAPI()
 
 container = setup_di()
 setup_dishka(container, app)
 
-logger = container.get(LoggerProtocol)
-
-app.add_middleware(LogMiddleware, logger=logger)
-app.include_router(router)
+# logger = container.get(LoggerProtocol)
+#
+# app.add_middleware(LogMiddleware, logger=logger)
 app.include_router(auth_router)
 
 if __name__ == '__main__':
-    uvicorn.run("src.presentation.app:app", host='0.0.0.0', port=8009, reload=True)
+    uvicorn.run("src.presentation.app:app", host='127.0.0.1', port=8000, reload=True)

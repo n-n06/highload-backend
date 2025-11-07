@@ -12,9 +12,6 @@ class UserRead(schemas.BaseUser[int]):
 
 class UserCreate(schemas.BaseUserCreate):
     email: EmailStr  # email validation
-    password: str
-    is_active: bool | None = True
-    is_verified: bool | None = False
     role: UserRole
 
 class UserUpdate(schemas.BaseUserUpdate):
