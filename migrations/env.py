@@ -16,6 +16,7 @@ from src.auth.models import User
 from src.locations.models import Location
 from src.orders.models import Order
 from src.products.models import Product
+from src.products_stock.models import LocationProduct 
 
 from src.config import settings  
 

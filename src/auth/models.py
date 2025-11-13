@@ -1,4 +1,4 @@
-from sqlalchemy import String, Enum, Boolean
+from sqlalchemy import String, Enum, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db import Base
@@ -27,16 +27,24 @@ class User(Base):
         Boolean, default=False, nullable=False
     )
 
-
-    orders_as_manager: Mapped[list[Order]] = relationship(
-        "Order",
-        back_populates="manager", 
-        foreign_keys="[Order.manager_id]"
+    # associated location of the user
+    location_id: Mapped[int] = mapped_column(
+        ForeignKey("locations.id"), nullable=True
     )
+    location = relationship("Location", back_populates="users")
 
-    orders_as_delivery_guy: Mapped[list[Order]] = relationship(
+    
+    # order processing 
+    orders_as_manager: Mapped[list["Order"]] = relationship(
+        "Order",
+        back_populates="manager",
+        foreign_keys="[Order.manager_id]",
+    )
+    orders_as_delivery_guy: Mapped[list["Order"]] = relationship(
         "Order",
         back_populates="delivery_guy",
-        foreign_keys="[Order.delivery_guy_id]"
+        foreign_keys="[Order.delivery_guy_id]",
     )
+
+
 

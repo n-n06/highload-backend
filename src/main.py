@@ -14,13 +14,16 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from src.auth.router import auth_router
+from src.auth.admin import lifespan
 from src.locations.router import router as locations_router
 from src.orders.router import router as orders_router
 from src.products.router import router as products_router
+
+
 from src.log.middleware import LogMiddleware
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(LogMiddleware)
 
 app.include_router(auth_router)
