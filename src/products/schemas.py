@@ -1,11 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ProductRead(BaseModel):
     id: int
     name: str
     description: str
-    stock: int = 0
     threshold: int = 0
+
+    model_config = ConfigDict(from_attributes=True)
 
 class BaseProductUpdate(BaseModel):
     pass
@@ -13,11 +14,9 @@ class BaseProductUpdate(BaseModel):
 class ProductUpdate(BaseProductUpdate):
     name: str
     description: str
-    stock: int
     threshold: int
 
 class ProductPartUpdate(BaseProductUpdate):
     name: str | None = None
     description: str | None = None
-    stock: int | None = None
     threshold: int | None = None

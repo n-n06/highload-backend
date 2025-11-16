@@ -13,6 +13,13 @@ engine = create_async_engine(
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False)
 Base = declarative_base()
 
+def load_all_models():
+    import src.auth.models
+    import src.locations.models
+    import src.products.models
+    import src.products_stock.models
+    import src.orders.models
+
 async def get_db():
     async with AsyncSessionLocal() as session:
         yield session

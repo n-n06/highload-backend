@@ -2,7 +2,6 @@ from fastapi_users import schemas
 from pydantic import EmailStr
 
 import enum
-from typing import Optional
 
 class UserRole(enum.Enum):
     ADMIN = "admin"
@@ -15,6 +14,7 @@ class UserRead(schemas.BaseUser[int]):
     email: EmailStr
     is_active: bool = True
     is_verified: bool = False
+    is_superuser: bool = False
     role: UserRole
 
 class UserCreate(schemas.BaseUserCreate):
@@ -22,7 +22,8 @@ class UserCreate(schemas.BaseUserCreate):
     password: str
     is_active: bool | None = True
     is_verified: bool | None = False
-    role: UserRole
+    is_superuser: bool = False
+    role: UserRole = UserRole.SALESMAN
 
 class UserUpdate(schemas.BaseUserUpdate):
     role: UserRole

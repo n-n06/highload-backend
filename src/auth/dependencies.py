@@ -1,6 +1,5 @@
 from fastapi import Depends, status
 from fastapi.security import OAuth2PasswordBearer
-from fastapi_users.authentication import JWTStrategy
 from fastapi.exceptions import HTTPException
 import jwt
 

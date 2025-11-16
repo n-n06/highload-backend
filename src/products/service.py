@@ -9,19 +9,20 @@ from src.auth.schemas import UserRead
 
 
 async def create_product(
-        db: AsyncSession, product_data: ProductUpdate, 
-        user: UserRead = Depends(current_active_user)
-    ):
+    db: AsyncSession,
+    product_data: ProductUpdate, 
+    user: UserRead = Depends(current_active_user)
+):
 
-    if product_data.stock < 0 or product_data.threshold < 0:
+    if product_data.threshold < 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Stock or threshold for the product cannot be less than 0"
+            detail="Threshold for the product cannot be less than 0"
         )
 
     new_product = Product(
         name=product_data.name, description=product_data.description, 
-        stock=product_data.stock, threshold=product_data.threshold
+        threshold=product_data.threshold
     )
     db.add(new_product)
     await db.commit()
@@ -47,17 +48,19 @@ async def get_product_by_id(db: AsyncSession, product_id: int):
 
 
 async def update_product_info(
-        db: AsyncSession, product_id: int, product_data: BaseProductUpdate,
-        user: UserRead = Depends(current_active_user)
-    ):
+    db: AsyncSession, 
+    product_id: int,
+    product_data: BaseProductUpdate,
+    user: UserRead = Depends(current_active_user)
+):
 
     product = await get_product_by_id(db=db, product_id=product_id)
 
     for key, value in product_data.model_dump().items():
-        if (key == "stock" and value < 0) or (key=="threshold" and value < 0):
+        if (key=="threshold" and value < 0):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Stock or threshold for the product cannot be less than 0"
+                detail="Threshold for the product cannot be less than 0"
             ) 
         if value is None:
             continue # skip setting the value 
@@ -69,9 +72,10 @@ async def update_product_info(
 
 
 async def delete_product(
-        db: AsyncSession, product_id: int, 
-        user: UserRead = Depends(current_active_user)
-    ):
+    db: AsyncSession,
+    product_id: int, 
+    user: UserRead = Depends(current_active_user)
+):
 
     product = await get_product_by_id(db, product_id)
 

@@ -2,13 +2,13 @@ from typing import Any
 
 from fastapi import APIRouter, status, Depends
 from fastapi.exceptions import HTTPException
-from fastapi_users import fastapi_users
 from fastapi_users.router import ErrorCode
+from fastapi_users.exceptions import UserNotExists
 
 from src.auth.strategy import fastapi_users, auth_backend
 from src.auth.manager import get_user_manager, UserManager
 from src.auth.schemas import UserCreate, UserRead, UserUpdate, UserRole
-from src.auth.dependencies import has_permissions
+from src.auth.dependencies import has_permissions, current_active_user
 
 
 auth_router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -23,28 +23,27 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 async def custom_register(
     user_create: UserCreate,
     user_manager: UserManager = Depends(get_user_manager),
-    permissions: Any = Depends(has_permissions([UserRole.ADMIN]))
+    user=Depends(current_active_user),
+    permissions=Depends(has_permissions([UserRole.ADMIN]))
 ):
-    existing_user = await user_manager.get_by_email(user_create.email)
-
-    if existing_user:
+    try:
+        existing_user = await user_manager.get_by_email(user_create.email)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorCode.REGISTER_USER_ALREADY_EXISTS,
         )
-
-    created_user = await user_manager.create(user_create, safe=True)
-
-    return created_user
+    except UserNotExists:
+        created_user = await user_manager.create(user_create, safe=True)
+        return created_user
 
 
 
 auth_router.include_router(
     fastapi_users.get_auth_router(auth_backend)
 )
-auth_router.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
-)
+# auth_router.include_router(
+#     fastapi_users.get_register_router(UserRead, UserCreate),
+# )
 auth_router.include_router(
     fastapi_users.get_reset_password_router(),
 )

@@ -50,3 +50,18 @@ class Order(Base):
         back_populates="orders_to",
         foreign_keys=[location_to_id],
     )
+
+    products = relationship("OrderProduct", back_populates="order", lazy="selectin")
+
+
+
+class OrderProduct(Base):
+    __tablename__ = "order_products"
+
+    id = Column(Integer, primary_key=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+
+    order = relationship("Order", back_populates="products")
+    product = relationship("Product", lazy="joined")  # or selectinload

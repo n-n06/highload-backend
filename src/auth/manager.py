@@ -17,14 +17,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
     
-    async def create_superuser(
-        self, 
-        user_create_dict: dict, 
-        safe: bool = False
-    ) -> User:
-        user_create_dict["is_superuser"] = True
-        user = await self.create(user_create_dict, safe)
-        return user
+
 
     async def validate_password(
             self, 

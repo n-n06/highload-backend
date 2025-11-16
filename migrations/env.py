@@ -11,12 +11,12 @@ sys.path.insert(
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 )
 
-from src.auth.models import Base  
+from src.db import Base  
 from src.auth.models import User
-from src.locations.models import Location
-from src.orders.models import Order
-from src.products.models import Product
 from src.products_stock.models import LocationProduct 
+from src.locations.models import Location
+from src.products.models import Product
+from src.orders.models import Order
 
 from src.config import settings  
 

@@ -1,10 +1,10 @@
+from fastapi_users.schemas import BaseUser
 from sqlalchemy import String, Enum, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db import Base
 from src.auth.schemas import UserRole
 from src.orders.models import Order
-
 
 class User(Base):
 
@@ -24,6 +24,9 @@ class User(Base):
         Boolean, default=True, nullable=False
     )
     is_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    is_superuser: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
 
