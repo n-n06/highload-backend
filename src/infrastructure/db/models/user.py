@@ -1,10 +1,9 @@
 from sqlalchemy import String, Enum, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.infrastructure.db.models.base import Base
-from src.domain.value_objects.user_roles import UserRole
-from src.infrastructure.db.models import Order
-from src.tmp.locations.models import Location
+from src.domain.value_objects import UserRole
+from src.infrastructure.db.base import Base
+from src.infrastructure.db.models.order import Order
 
 
 class User(Base):
@@ -39,9 +38,5 @@ class User(Base):
         "Order",
         back_populates="delivery_guy",
         foreign_keys="[Order.delivery_guy_id]"
-    )
-
-    location: Mapped[Location] = relationship(
-        "locations", back_populates="users"
     )
 

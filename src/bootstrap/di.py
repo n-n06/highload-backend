@@ -1,6 +1,9 @@
-from dishka import AsyncContainer, Provider, Scope, make_async_container
+import logging
+
+from dishka import Container, Provider, Scope, make_container
 from dishka.integrations.fastapi import FastapiProvider
 
+from src.domain.protocols.logger import LoggerProtocol
 from src.infrastructure.db.repositories.base_repo import (
     ProductRepository,
     UserRepository,
@@ -13,11 +16,9 @@ from src.infrastructure.db import (
     get_async_sessionmaker,
     get_async_session,
 )
-from src.domain.protocols.logger_protocol import LoggerProtocol
-from src.infrastructure.logger.factory import create_logger
-from src.infrastructure.redis.client import RedisClient, get_redis_client
-from src.infrastructure.tasks.broker import broker
-from src.bootstrap.config import settings
+from src.infrastructure.logger.logstash_logger import LogstashLogger
+
+
 
 def db_provider()-> Provider:
     provider = Provider()
@@ -69,34 +70,7 @@ def service_provider() -> Provider:
 
 def logger_provider() -> Provider:
     provider = Provider(scope=Scope.APP)
-
-    def get_logger() -> LoggerProtocol:
-        return create_logger(
-            name="highload-backend-app",
-            logstash_host=settings.LOGSTASH_HOST,
-            logstash_port=settings.LOGSTASH_PORT
-        )
-
-    provider.provide(get_logger, provides=LoggerProtocol)
-
-    return provider
-
-
-def redis_provider() -> Provider:
-    provider = Provider(scope=Scope.APP)
-
-    provider.provide(get_redis_client, provides=RedisClient)
-
-    return provider
-
-
-def task_provider() -> Provider:
-    provider = Provider(scope=Scope.APP)
-
-    def get_broker():
-        return broker
-
-    provider.provide(get_broker, provides=type(broker))
+    provider.provide(LogstashLogger, provides=LoggerProtocol)
 
     return provider
 
@@ -112,8 +86,8 @@ def setup_providers()->list[Provider]:
     ]
 
 
-def setup_di()->AsyncContainer:
-    container = make_async_container(
+def setup_di()->Container:
+    container = make_container(
         *setup_providers(),
         FastapiProvider()
     )

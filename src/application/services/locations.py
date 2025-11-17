@@ -2,9 +2,8 @@ from typing import List
 from fastapi import HTTPException, status
 
 from src.domain.entities import Location, User
-from src.application.schemas.locations import LocationCreate, BaseLocationUpdate
 from src.infrastructure.db.repositories.base_repo import LocationRepository
-
+from src.presentation.schemas.locations import BaseLocationUpdate, LocationCreate
 
 
 class LocationService:

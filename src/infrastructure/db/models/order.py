@@ -1,8 +1,8 @@
 from typing import Optional
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from src.infrastructure.db.models.base import Base
+from sqlalchemy.orm import relationship
 
+from src.infrastructure.db.base import Base
 
 class Order(Base):
     __tablename__ = "orders"

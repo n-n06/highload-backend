@@ -1,23 +1,26 @@
 import time
 
-from starlette.middleware.base import BaseHTTPMiddleware
+from dishka import FromDishka
+from starlette.middleware.base import (
+    BaseHTTPMiddleware, DispatchFunction, RequestResponseEndpoint
+)
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.types import Message
+from starlette.types import Message, ASGIApp
 
-from src.domain.protocols.logger_protocol import LoggerProtocol
+from src.domain.protocols.logger import LoggerProtocol
 from src.infrastructure.logger.utils import (
     flatten_dict, sanitize_headers, iterate_in_memory
 )
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, logger: LoggerProtocol):
-
+    def __init__(self, app: ASGIApp, logger: FromDishka[LoggerProtocol]) -> None:
         super().__init__(app)
         self.logger = logger
 
-    async def dispatch(self, request: Request, call_next):
+
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         start_time = time.time()
 
         body_bytes = await request.body()
@@ -36,7 +39,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             response: Response = await call_next(request)
             process_time = round((time.time() - start_time) * 1000, 2)
         except Exception as exc:
-            self.logger.exception("Request failed", exc=exc)
+            self.logger.exception(f"Request failed: {exc}")
             raise exc
 
         resp_body = b""
@@ -77,8 +80,8 @@ class LogMiddleware(BaseHTTPMiddleware):
         }
 
         log_data.update(flatten_dict(nested_fields, sep="_"))
-
-        self.logger.info("Request Log", **log_data)
+        
+        self.logger.info("Request Log", extra=log_data)
         return response
 
 

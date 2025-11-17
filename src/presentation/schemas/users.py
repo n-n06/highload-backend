@@ -2,7 +2,6 @@ from fastapi_users import schemas
 from pydantic import EmailStr
 
 from src.domain.value_objects.user_roles import UserRole
-from src.application.schemas.locations import LocationRead
 
 class UserRead(schemas.BaseUser[int]):
     id: int
@@ -10,7 +9,6 @@ class UserRead(schemas.BaseUser[int]):
     is_active: bool = True
     is_verified: bool = False
     role: UserRole
-    location: LocationRead | None
 
 class UserCreate(schemas.BaseUserCreate):
     email: EmailStr  # email validation

@@ -1,14 +1,13 @@
-from src.infrastructure.db.models import (
-    Product, User, Order, OrderProduct, Location, LocationProduct
-)
-
 from typing import TypeVar, Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from src.domain.protocols.db import BaseRepositoryProtocol
-
+from src.infrastructure.db.models.location import Location
+from src.infrastructure.db.models.user import User
+from src.infrastructure.db.models.order import Order
+from src.infrastructure.db.models.product import Product
 
 T = TypeVar("T")
 
