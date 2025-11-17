@@ -63,7 +63,76 @@ FastAPI-based ERP module that manages locations, inventory and transfer orders. 
 
 ## Project Structure
 
-
+```
+.
+├── alembic.ini
+├── .env
+├── auth.env
+├── docker-compose.yml
+├── Dockerfile
+├── entrypoint.sh
+├── env
+│   └── auth.env.example
+│   └── .env.example
+├── erp_module.py
+├── logstash.conf
+├── logstash.db
+├── migrations
+│   ├── env.py
+│   ├── README
+│   ├── script.py.mako
+│   └── versions
+├── pyproject.toml
+├── README.md
+├── src
+│   ├── auth
+│   │   ├── admin.py
+│   │   ├── config.py
+│   │   ├── db.py
+│   │   ├── dependencies.py
+│   │   ├── __init__.py
+│   │   ├── manager.py
+│   │   ├── models.py
+│   │   ├── router.py
+│   │   ├── schemas.py
+│   │   └── strategy.py
+│   ├── config.py
+│   ├── db.py
+│   ├── __init__.py
+│   ├── locations
+│   │   ├── __init__.py
+│   │   ├── inventory_router.py
+│   │   ├── inventory_service.py
+│   │   ├── models.py
+│   │   ├── router.py
+│   │   ├── schemas.py
+│   │   └── service.py
+│   ├── log
+│   │   ├── __init__.py
+│   │   ├── logstash.py
+│   │   ├── middleware.py
+│   │   └── utils.py
+│   ├── main.py
+│   ├── orders
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── router.py
+│   │   ├── schemas.py
+│   │   └── service.py
+│   ├── products
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── router.py
+│   │   ├── schemas.py
+│   │   └── service.py
+│   ├── products_stock
+│   │   ├── models.py
+│   ├── redis
+│   │   └── utils.py
+│   └── utils.py
+├── TASKS.md
+└── uv.lock
+```
 
 ---
 
@@ -289,27 +358,27 @@ async def lifespan(app: FastAPI):
 The admin is granted is_superuser=True and role ADMIN.
 
 ## API Overview
-| Area | Endpoint | Method | Description | Permissions |
-| :-- | :-- | :-- | :-- | :-- |
-| Locations | /locations/ | POST | Create new location | Admin |
-|  | /locations/ | GET | List locations (cached) | Authenticated |
-|  | /locations/{id} | GET | Get location details (incl. inventory) | Authenticated |
-|  | /locations/{id} | PUT | Update location | Admin |
-|  | /locations/{id} | PATCH | Partial update | Admin |
-|  | /locations/{id} | DELETE | Delete location | Superuser |
-| Inventory | /locations/{loc_id}/products/ | GET | List inventory entries with product details | Authenticated |
-|  | /locations/{loc_id}/products/{pid} | GET | Get single inventory record | Authenticated |
-|  | /locations/{loc_id}/products/ | POST | Create inventory entry | Manager/Admin |
-|  | /locations/{loc_id}/products/{pid} | PUT | Upsert inventory entry | Manager/Admin |
-|  | /locations/{loc_id}/products/{pid} | PATCH | Adjust stock by delta | Manager/Admin |
-|  | /locations/{loc_id}/products/{pid} | DELETE | Remove inventory record | Manager/Admin |
-|  | /locations/{loc_id}/products/low-stock | GET | Products below threshold | Authenticated |
-|  | /locations/{loc_id}/products/transfer | POST | Transfer stock to another location | Manager/Admin |
-| Orders | /orders/ | POST | Create new transfer order (with product lines) | Manager |
-|  | /orders/ | GET | List manager’s orders | Manager |
-|  | /orders/{id} | GET | Retrieve order (manager or assigned delivery) | Manager/Delivery/Admin |
-|  | /orders/{id} | PUT | Update order (replaces products, adjusts inventory) | Manager |
-|  | /orders/{id}/deliver | POST | Mark delivered; adds stock to destination | Delivery person/Admin |
+| Endpoint | Method | Description | Permissions |
+| :-- | :-- | :-- | :-- |
+| /locations/ | POST | Create new location | Admin |
+| /locations/ | GET | List locations (cached) | Authenticated |
+| /locations/{id} | GET | Get location details (incl. inventory) | Authenticated |
+| /locations/{id} | PUT | Update location | Admin |
+| /locations/{id} | PATCH | Partial update | Admin |
+| /locations/{id} | DELETE | Delete location | Superuser |
+| /locations/{loc_id}/products/ | GET | List inventory entries with product details | Authenticated |
+| /locations/{loc_id}/products/{pid} | GET | Get single inventory record | Authenticated |
+| /locations/{loc_id}/products/ | POST | Create inventory entry | Manager/Admin |
+| /locations/{loc_id}/products/{pid} | PUT | Upsert inventory entry | Manager/Admin |
+| /locations/{loc_id}/products/{pid} | PATCH | Adjust stock by delta | Manager/Admin |
+| /locations/{loc_id}/products/{pid} | DELETE | Remove inventory record | Manager/Admin |
+| /locations/{loc_id}/products/low-stock | GET | Products below threshold | Authenticated |
+| /locations/{loc_id}/products/transfer | POST | Transfer stock to another location | Manager/Admin |
+| /orders/ | POST | Create new transfer order (with product lines) | Manager |
+| /orders/ | GET | List manager’s orders | Manager |
+| /orders/{id} | GET | Retrieve order (manager or assigned delivery) | Manager/Delivery/Admin |
+| /orders/{id} | PUT | Update order (replaces products, adjusts inventory) | Manager |
+| /orders/{id}/deliver | POST | Mark delivered; adds stock to destination | Delivery person/Admin |
 
 Authentication endpoints (/auth/login, /auth/register, etc.) provided by FastAPI Users (see src/auth/router.py).
 
