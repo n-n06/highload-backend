@@ -1,31 +1,315 @@
-## Task 1 Answers
+# ERP Module – Inventory management
 
-### Как выбор структуры базы данных (SQL или NoSQL) влияет на дизайн CRUD API? 
-In general, the main difference between SQL and NoSQL (which means Not only SQL) DB is the fact that SQL DBs store data in tables, while NoSQL DBs in document, key-value, column-family, or graph-based structures. Tables are usually defined with a rather strict/fixed schema, while NoSQL DBs support dynamic schemas, This means, that when designing CRUD API we have more flexibility when working with data. For example, when working with document based DBs, it is esay to define new parameters (keys), while in SQL DBs we have to add an additional column for that.
+FastAPI-based ERP module that manages locations, inventory and transfer orders. Built with asynchronous SQLAlchemy, PostgreSQL, Redis-backed caching, and FastAPI Users for authentication/authorization.
 
-Also, we might integrate some complex join operations for some of our GET endpoints. SQL supports joins, while it is difficult to do with NoSQL DBs. So, when designin a CRUD API we have to keep that in mind. However, since data in NoSQL DBs like Mongo can be nested - we might not need joins, as we might store the necessary data in 1 object. For example, in an SQL DB we would have to join orders and products to see the products in an order for an endpoint like `GET /orders/:id/products`, while the products might be stored in the orders itself, so that we would get them by using `GET /orders/:id`. So, in the end, the GET operations might be easier for NoSQL DBs
+---
 
-If we have an UPDATE endpoint, it might be tricky to do with NoSQL DBs are there might be duplicates in several objects, while it is fairly simple in SQL DBs (assuming of course that our SQL DB is normalized up to 3NF and has no redundancy). So, SQL DBs are better for updates, fine-grained reads.
+## Contents
+1. [Tech Stack](#tech-stack)
+2. [Features](#features)
+3. [Project Structure](#project-structure)
+4. [Requirements](#requirements)
+5. [Environment Variables](#environment-variables)
+6. [Setup & Installation](#setup--installation)
+7. [Database & Migrations](#database--migrations)
+8. [Running the App](#running-the-app)
+9. [Caching](#caching)
+10. [Admin Initialization](#admin-initialization)
+11. [API Overview](#api-overview)
 
-Also, SQL is a mostly standardized language that is almost the same for various RDBMS systems. NoSQL, on the other hand, differs in this aspect, as different NoSQL DBs have different ways query patterns. So, changing the DB in the middle of creating an API might be more of a problem when using NoSQL.
+---
 
-In general, when we design a CRUD API, we have to consider what are our main goals - a fine-grained control, where there is no redundancy, fixed schema and also transactions OR a fast, larger-grained, eventually consistent view of data.
+## Tech Stack
 
-### Какие проблемы могут возникнуть при массовых обновлениях данных через API? 
-- Overload of network, database, server and everything else 
-- DB objects get locked (if transactions are present) and other users can't access it
-- Risk of inconsistent or weird data if transactions are not set up (no transactions in SQL or using NoSQL)
-- Potential timeouts
-- Hard to monitor batch updates - too much logs :(
+- **FastAPI** for REST API
+- **SQLAlchemy 2.0 (async), AsyncPG** for database access
+- **PostgreSQL** as the DB
+- **Alembic** for schema migrations
+- **Redis** (via `aiocache`) for response caching
+- **FastAPI Users** for authentication, user management, and role-based access
+- **Pydantic v2** for request/response validation
+- **ELK Stack** for gathering, indexing and visualizing logs
+- **Docker & Compose** for containerized development
 
-Couple of solutions (from a Habr article):
-- batch endpoint - can put everything into 1 transaction, reduces network congestion and number of HTTP connections. However, it would be harder to parse the response object, and we would have to handle elements separately (status code 207 and separate reports)
-- async hadnling - does not block http brokers, reduces strain on the system. Requires msg broker and background tasks handler (Celery with Redis). Client has to wait for the answer 
+---
+
+## Features
+
+### Authentication & Users
+- FastAPI Users integration
+- Role-based permissions (`ADMIN`, `MANAGER`, `SALESMAN`, `DELIVERY`, …)
+- Startup hook initialises an admin user from environment variables
+
+### Locations
+- CRUD operations for locations (name, address, type)
+- Optional caching layer on the “list all locations” endpoint
+- Access control (only admins/managers can edit)
+
+### Inventory (per Location)
+- Store and manage stock using `location_products`
+- Endpoints to list, fetch, create, update, delete inventory entries
+- Adjust stock atomically (increment/decrement)
+- Low-stock reporting (`stock < threshold`)
+- Transfer inventory between locations with validation
+
+### Orders (Inventory Transfers)
+- Orders represent transfers between locations
+- Orders contain product lines (`OrderProduct` items with quantity)
+- Consumes/reserves stock at source when created/updated
+- Releases stock to destination when delivered
+- Full CRUD with nested products in responses
+
+---
+
+## Project Structure
 
 
-### Почему важно использовать правильные HTTP-методы (GET, POST, PUT, DELETE), а не только POST? 
-I think it is important to use HTTP methods as they are intended for several reasons
-- self-documentation / semantic methods - the name of the method tells the user what type of operation this endpoint provides. The rules for HTTP methods are standardized, so this would make communication between back/front teams easier, and would make the API more intuitive and predictable. I think it is the same as using `<header>`, `<article>`, `<footer>` in HTML instead of `div`s with a lot of ids and class names. This provides a general understanding of the code without even looking deep into it.
-- browsers cache GET requests, so usign POST everywhere would make the API slower
-- PUT and DELETE methods guarantee idempotency (press the button 10 times in a row, but get the same result). If we use POST everywhere, we lose this
+
+---
+
+## Requirements
+
+- Docker & docker-compose
+- Python 3.11+
+- uv (preferred for speed) or Poetry (for Python dependency management)
+- PostgreSQL
+- Elastic Stack - Elasticsearch, Logstash, Kibana
+- Redis
+- Preferrably 16 Gb of RAM, or 8 Gb of RAM with a sufficiently large swap file
+
+---
+
+## Environment Variables
+
+Create `.env` and `auth.env` file with environment variables used by the app.
+Example `.env`:
+```
+DB_HOST="DB_HOST"
+DB_PORT=0000
+DB_NAME="DB_NAME"
+DB_USER="DB_USER"
+DB_PASS="DB_PASS"
+LOGSTASH_HOST="LOGSTASH_HOST"
+LOGSTASH_PORT=0000
+REDIS_HOST="REDIS_HOST"
+REDIS_PORT=0000
+ADMIN_EMAIL="user@example.com"
+ADMIN_PASS="Pass123!"
+```
+Example `auth.env`:
+```
+SECRET=SECRET
+```
+It is best to use something more secure than just `SECRET`.
+
+
+## Setup & Installation
+```
+curl -LsSf https://astral.sh/uv/install.sh | sh # installs uv
+git clone https://github.com/n-n06/highload-backend
+cd highload-backend
+uv sync
+source .venv/bin/activate
+uv run uvicorn src.main:app --reload #runs the app
+```
+
+## Database & Migrations
+
+Generate migrations after schema changes:
+```
+alembic revision --autogenerate -m "description"
+```
+Apply migrations:
+```
+alembic upgrade head
+```
+
+`alembic/env.py` imports Base from src.db and loads all model modules before running.
+
+## Run the app
+### Local
+```
+uv run uvicorn src.main:app --reload #runs the app
+```
+The API docs will be at: http://127.0.0.1:8000/docs
+
+### Docker
+```yml
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - 9200:9200
+    ...
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.0
+    container_name: logstash
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - 5044:5044
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    ports:
+      - 5601:5601
+
+  db:
+    image: postgres:16
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: erp-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis-data:/data
+
+  app:
+    build: .
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+      - auth.env
+    # volumes:
+    #   - ./src:/app
+
+volumes:
+  pgdata:
+  redis-data:
+```
+
+Start everything:
+```bash
+docker compose build
+docker compose up -d
+```
+
+## Caching
+- Uses aiocache with the Redis backend: cache=Cache.REDIS
+- endpoint/port provided via settings (REDIS_HOST, REDIS_PORT)
+- Namespace: "main", so keys appear as main:<hash>
+- Serializer: PickleSerializer recommended when caching ORM objects or Pydantic models
+
+Example cached endpoint:
+
+```python
+@cached(
+    ttl=1000,
+    cache=Cache.REDIS,
+    endpoint=settings.redis_host,
+    port=settings.redis_port,
+    namespace="main",
+    key_builder=make_key,
+    serializer=PickleSerializer(),
+)
+@location_router.get("/", response_model=list[LocationRead])
+async def list_all_locations(...):
+    ...
+```
+Inspect keys inside the Redis container:
+
+```bash
+docker exec -it erp-redis redis-cli
+127.0.0.1:6379> KEYS main:*
+```
+
+## Admin Initialization
+
+The FastAPI lifespan hook auto-creates (or updates) an admin user using ADMIN_EMAIL/ADMIN_PASS:
+```python
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with AsyncSessionLocal() as session:
+        user_db_gen = get_user_db(session)
+        user_db = await anext(user_db_gen)
+
+        user_manager_gen = get_user_manager(user_db)
+        user_manager = await anext(user_manager_gen)
+
+        try:
+            admin = await user_manager.get_by_email(settings.ADMIN_EMAIL)
+
+            updated = False
+
+            if not admin.is_superuser:
+                admin.is_superuser = True
+                updated = True
+            if admin.role != UserRole.ADMIN:
+                admin.role = UserRole.ADMIN
+                updated = True
+
+            if updated:
+                await session.commit()
+        except:
+            user_create = UserCreate(
+                email=settings.ADMIN_EMAIL,
+                password=settings.ADMIN_PASS,
+                role=UserRole.ADMIN,
+                is_verified=True,
+                is_superuser=True,
+            )
+            await user_manager.create(user_create, safe=False)
+            await session.commit()
+        finally:
+            await user_manager_gen.aclose()
+            await user_db_gen.aclose()
+
+    yield
+
+```
+The admin is granted is_superuser=True and role ADMIN.
+
+## API Overview
+| Area | Endpoint | Method | Description | Permissions |
+| :-- | :-- | :-- | :-- | :-- |
+| Locations | /locations/ | POST | Create new location | Admin |
+|  | /locations/ | GET | List locations (cached) | Authenticated |
+|  | /locations/{id} | GET | Get location details (incl. inventory) | Authenticated |
+|  | /locations/{id} | PUT | Update location | Admin |
+|  | /locations/{id} | PATCH | Partial update | Admin |
+|  | /locations/{id} | DELETE | Delete location | Superuser |
+| Inventory | /locations/{loc_id}/products/ | GET | List inventory entries with product details | Authenticated |
+|  | /locations/{loc_id}/products/{pid} | GET | Get single inventory record | Authenticated |
+|  | /locations/{loc_id}/products/ | POST | Create inventory entry | Manager/Admin |
+|  | /locations/{loc_id}/products/{pid} | PUT | Upsert inventory entry | Manager/Admin |
+|  | /locations/{loc_id}/products/{pid} | PATCH | Adjust stock by delta | Manager/Admin |
+|  | /locations/{loc_id}/products/{pid} | DELETE | Remove inventory record | Manager/Admin |
+|  | /locations/{loc_id}/products/low-stock | GET | Products below threshold | Authenticated |
+|  | /locations/{loc_id}/products/transfer | POST | Transfer stock to another location | Manager/Admin |
+| Orders | /orders/ | POST | Create new transfer order (with product lines) | Manager |
+|  | /orders/ | GET | List manager’s orders | Manager |
+|  | /orders/{id} | GET | Retrieve order (manager or assigned delivery) | Manager/Delivery/Admin |
+|  | /orders/{id} | PUT | Update order (replaces products, adjusts inventory) | Manager |
+|  | /orders/{id}/deliver | POST | Mark delivered; adds stock to destination | Delivery person/Admin |
+
+Authentication endpoints (/auth/login, /auth/register, etc.) provided by FastAPI Users (see src/auth/router.py).
 
