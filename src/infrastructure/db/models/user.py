@@ -1,9 +1,9 @@
 from sqlalchemy import String, Enum, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src import Base
-from src import UserRole
-from src import Order
+from src.infrastructure.db.models.base import Base
+from src.domain.value_objects.user_roles import UserRole
+from src.infrastructure.db.models import Order
 from src.tmp.locations.models import Location
 
 

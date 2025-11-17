@@ -5,16 +5,17 @@ from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import Message
 
+from src.domain.protocols.logger_protocol import LoggerProtocol
 from src.infrastructure.logger.utils import (
-    flatten_dict, sanitize_headers, iterate_in_memory   
+    flatten_dict, sanitize_headers, iterate_in_memory
 )
-from src.infrastructure.logger.config import setup_logger
+
 
 class LogMiddleware(BaseHTTPMiddleware):
-    """
-    Middleware that logs structured json logs 
-    """
-    logger = setup_logger()
+    def __init__(self, app, logger: LoggerProtocol):
+
+        super().__init__(app)
+        self.logger = logger
 
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
@@ -23,9 +24,11 @@ class LogMiddleware(BaseHTTPMiddleware):
         body_text = body_bytes.decode("utf-8") if body_bytes else None
 
         async def receive() -> Message:
-            return {"type": "http.request",
-                    "body": body_bytes, 
-                    "more_body": False}
+            return {
+                "type": "http.request",
+                "body": body_bytes,
+                "more_body": False
+            }
 
         request = Request(request.scope, receive=receive)
 
@@ -33,7 +36,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             response: Response = await call_next(request)
             process_time = round((time.time() - start_time) * 1000, 2)
         except Exception as exc:
-            LogMiddleware.logger.exception("Request failed: ", exc)
+            self.logger.exception("Request failed", exc=exc)
             raise exc
 
         resp_body = b""
@@ -45,10 +48,6 @@ class LogMiddleware(BaseHTTPMiddleware):
             resp_text = resp_body.decode("utf-8")
         except Exception:
             resp_text = "<non-text-response>"
-
-        def sanitize_headers(headers: dict):
-            SENSITIVE = {"authorization", "cookie"}
-            return {k: v for k, v in headers.items() if k.lower() not in SENSITIVE}
 
         MAX_LEN = 2000
         if body_text and len(body_text) > MAX_LEN:
@@ -66,7 +65,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             "client_ip": request.client.host if request.client else None,
         }
 
-        nested_fields = { 
+        nested_fields = {
             "request": {
                 "headers": sanitize_headers(dict(request.headers)),
                 "body": body_text,
@@ -78,8 +77,8 @@ class LogMiddleware(BaseHTTPMiddleware):
         }
 
         log_data.update(flatten_dict(nested_fields, sep="_"))
-        
-        LogMiddleware.logger.info("Request Log", extra=log_data)
+
+        self.logger.info("Request Log", **log_data)
         return response
 
 

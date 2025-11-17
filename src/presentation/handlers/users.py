@@ -1,8 +1,5 @@
-from fastapi import APIRouter, Depends
-from dishka.integrations.fastapi import FromDishka
-from fastapi_users import FastAPIUsers
+from fastapi import APIRouter
 
-from src.infrastructure.db.models import User as UserModel
 from src.presentation.schemas.users import UserReadSchema, UserCreateSchema, UserUpdateSchema
 from fastapi_users.authentication import AuthenticationBackend
 

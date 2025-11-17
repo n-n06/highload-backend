@@ -1,8 +1,7 @@
-from typing import List, Optional
+from typing import List
 from fastapi import HTTPException, status
 
 from src.domain.entities import Location, User
-from src.domain.value_objects.user_roles import UserRole
 from src.application.schemas.locations import LocationCreate, BaseLocationUpdate
 from src.infrastructure.db.repositories.base_repo import LocationRepository
 

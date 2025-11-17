@@ -26,12 +26,6 @@ async def create_location(
         service: FromDishka[LocationService],
         current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Create a new location.
-
-    Requires ADMIN role.
-    """
-
     LocationAuthorizationService.require_admin(current_user)
 
     location = await service.create_location(location_data, current_user)
@@ -47,11 +41,6 @@ async def create_location(
 async def get_all_locations(
         service: FromDishka[LocationService]
 ):
-    """
-    Retrieve all locations.
-
-    Public endpoint - no authentication required.
-    """
     locations = await service.get_all_locations()
     return locations
 
@@ -82,15 +71,8 @@ async def update_location(
         service: FromDishka[LocationService],
         current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Update location information.
-
-    Requires MANAGER role or higher.
-    """
-    # Authorization check
     LocationAuthorizationService.require_manager(current_user)
 
-    # Business logic handled by service
     location = await service.update_location(location_id, location_data, current_user)
     return location
 
@@ -106,14 +88,7 @@ async def delete_location(
         service: FromDishka[LocationService],
         current_user: User = Depends(get_current_active_user)
 ):
-    """
-    Delete a location.
-
-    Requires SUPERUSER role.
-    """
-    # Authorization check
     LocationAuthorizationService.require_superuser(current_user)
 
-    # Business logic handled by service
     result = await service.delete_location(location_id, current_user)
     return result

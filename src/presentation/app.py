@@ -1,17 +1,30 @@
-from dishka import container
 import uvicorn
 from dishka.integrations.fastapi import setup_dishka
-from fastapi import FastAPI, HTTPException, Response, status
+from fastapi import FastAPI, Response, status
 
 from src.bootstrap.di import setup_di
 from src.infrastructure.logger.middleware import LogMiddleware
 from src.presentation.handlers import router
 
-app = FastAPI()
-app.add_middleware(LogMiddleware)
 
 container = setup_di()
+
+app = FastAPI()
+
+from src.infrastructure.logger.factory import create_logger
+from src.bootstrap.config import settings
+
+logger = create_logger(
+    name="highload-backend-app",
+    logstash_host=settings.LOGSTASH_HOST,
+    logstash_port=settings.LOGSTASH_PORT
+)
+
+
+app.add_middleware(LogMiddleware, logger=logger)
+
 setup_dishka(container, app)
+
 app.include_router(router)
 
 

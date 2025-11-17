@@ -1,8 +1,11 @@
-from src.infrastructure.db.models import Product, User, Order, Location
+from src.infrastructure.db.models import (
+    Product, User, Order, OrderProduct, Location, LocationProduct
+)
 
 from typing import TypeVar, Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from src.domain.protocols.db import BaseRepositoryProtocol
 
@@ -62,6 +65,57 @@ class OrderRepository(BaseRepository):
     def __init__(self, session: AsyncSession):
         super().__init__(session, Order)
 
+    def _order_with_related_stmt(self):
+        return (
+            select(Order)
+            .options(
+                selectinload(Order.manager),
+                selectinload(Order.delivery_guy),
+                selectinload(Order.location_from),
+                selectinload(Order.location_to),
+                selectinload(Order.products).selectinload(OrderProduct.product)
+            )
+        )
+
+    async def get(self, id: int) -> Order | None:
+        result = await self.session.execute(
+            self._order_with_related_stmt().where(Order.id == id)
+        )
+        return result.scalar_one_or_none()
+
+    async def list(self, offset: int = 0, limit: int = 20) -> list[Order]:
+        result = await self.session.execute(
+            self._order_with_related_stmt().offset(offset).limit(limit)
+        )
+        return list(result.scalars().all())
+
+
 class LocationRepository(BaseRepository):
     def __init__(self, session: AsyncSession):
         super().__init__(session, Location)
+
+
+class LocationProductRepository(BaseRepository):
+    def __init__(self, session: AsyncSession):
+        super().__init__(session, LocationProduct)
+
+    async def get_by_location_and_product(
+        self, location_id: int, product_id: int
+    ) -> LocationProduct | None:
+        result = await self.session.execute(
+            select(LocationProduct)
+            .options(selectinload(LocationProduct.product))
+            .where(
+                LocationProduct.location_id == location_id,
+                LocationProduct.product_id == product_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def list_by_location(self, location_id: int) -> list[LocationProduct]:
+        result = await self.session.execute(
+            select(LocationProduct)
+            .options(selectinload(LocationProduct.product))
+            .where(LocationProduct.location_id == location_id)
+        )
+        return list(result.scalars().all())
