@@ -11,6 +11,9 @@ class Product(Base):
     stock = Column(Integer, default=0)
     threshold = Column(Integer, default=0)  # managers can define the limit for the product
 
+    # Relationships
+    locations = relationship("LocationProduct", back_populates="product")
+
     __table_args__ = (
         CheckConstraint("stock >= 0", name="check_stock_ge_0"),
         CheckConstraint("threshold >= 0", name="check_threshold_ge_0")

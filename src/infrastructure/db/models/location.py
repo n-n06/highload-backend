@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import Integer, String, Enum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.domain.value_objects import LocationType
 from src.infrastructure.db.base import Base

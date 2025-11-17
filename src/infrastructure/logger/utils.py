@@ -22,5 +22,4 @@ def flatten_dict(d, parent_key="", sep="_"):
 
 
 async def iterate_in_memory(data: bytes):
-    """Helper to replay response body from memory."""
     yield data

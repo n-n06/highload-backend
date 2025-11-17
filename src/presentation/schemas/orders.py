@@ -1,30 +1,55 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
+
+from .products import ProductRead
+from .locations import LocationRead
+from .users import UserRead
+
+
+class OrderProductRead(BaseModel):
+    product: ProductRead
+    quantity: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class OrderProductCreate(BaseModel):
+    product_id: int
+    quantity: int
+
+
+class LocationReadShallow(BaseModel):
+    id: int
+    name: str
+    address: str
+    location_type: str
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderRead(BaseModel):
     id: int
-    manager_id: int
-    delivery_guy_id: Optional[int]
-    location_id: int
+    manager: UserRead
+    delivery_guy: UserRead | None = None
+    location_from: LocationReadShallow
+    location_to: LocationReadShallow
     status: str
+    products: list[OrderProductRead]
 
-    class Config:
-        orm_mode = True  
+    model_config = ConfigDict(from_attributes=True)
 
 
 class OrderCreate(BaseModel):
     delivery_guy_id: int | None = None
-    location_id: int
-    status: str | None = "pending" 
+    location_from_id: int
+    location_to_id: int
+    products: list[OrderProductCreate]
+    status: str | None = "pending"
 
-class BaseOrderUpdate(BaseModel):
-    pass
 
-class OrderUpdate(BaseOrderUpdate):
-    delivery_guy_id: int     
-    status: str
-
-class OrderPartUpdate(BaseOrderUpdate):
+class OrderUpdate(BaseModel):
     delivery_guy_id: int | None = None
+    location_from_id: int | None = None
+    location_to_id: int | None = None
     status: str | None = None
+    products: list[OrderProductCreate] | None = None

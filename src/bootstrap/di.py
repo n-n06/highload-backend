@@ -9,8 +9,9 @@ from src.infrastructure.db.repositories.base_repo import (
     UserRepository,
     LocationRepository,
     OrderRepository,
+    LocationProductRepository,
 )
-from src.infrastructure.db.dependencies import (
+from src.infrastructure.db import (
     get_engine,
     get_async_sessionmaker,
     get_async_session,
@@ -47,12 +48,27 @@ def repo_provider() -> Provider:
     provider.provide(UserRepository)
     provider.provide(OrderRepository)
     provider.provide(LocationRepository)
+    provider.provide(LocationProductRepository)
+
+    return provider
+
+
+def service_provider() -> Provider:
+    from src.application.services.orders import OrderService
+    from src.application.services.inventory import InventoryService
+    from src.application.services.locations import LocationService
+
+    provider = Provider(scope=Scope.REQUEST)
+
+    provider.provide(OrderService)
+    provider.provide(InventoryService)
+    provider.provide(LocationService)
 
     return provider
 
 
 
-def logger_provider()-> Provider:
+def logger_provider() -> Provider:
     provider = Provider(scope=Scope.APP)
     provider.provide(LogstashLogger, provides=LoggerProtocol)
 
@@ -63,7 +79,10 @@ def setup_providers()->list[Provider]:
     return [
         db_provider(),
         repo_provider(),
-        logger_provider()
+        service_provider(),
+        logger_provider(),
+        redis_provider(),
+        task_provider(),
     ]
 
 

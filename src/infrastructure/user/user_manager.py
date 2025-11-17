@@ -10,10 +10,6 @@ from src.presentation.schemas.users import UserCreate
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
-    """
-    fastapi-users UserManager
-    Адаптер между fastapi-users и нашей domain логикой
-    """
 
     def __init__(self, user_db):
         super().__init__(user_db)
@@ -29,7 +25,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
         user_create_dict["is_superuser"] = True
         user_create_dict["role"] = "admin"
-        user = await self.create(user_create_dict, safe)
+        user = await self.create(User(**user_create_dict), safe)
         return user
 
 
