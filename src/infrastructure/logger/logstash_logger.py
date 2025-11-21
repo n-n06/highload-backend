@@ -8,9 +8,6 @@ from src.domain.protocols.logger import LoggerProtocol
 from src.bootstrap.config import settings
 
 class LogstashLogger(LoggerProtocol):
-    """
-    Implementation of the LoggerProtocol using Logstash
-    """
     def __init__(self) -> None:
         super().__init__()
         self.logger = logging.getLogger("erp-module-app")

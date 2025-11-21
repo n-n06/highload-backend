@@ -10,14 +10,11 @@ from starlette.types import Message, ASGIApp
 
 from src.domain.protocols.logger import LoggerProtocol
 from src.infrastructure.logger.utils import (
-    flatten_dict, sanitize_headers, iterate_in_memory   
+    flatten_dict, sanitize_headers, iterate_in_memory
 )
 
 
 class LogMiddleware(BaseHTTPMiddleware):
-    """
-    Middleware that logs structured json logs 
-    """
     def __init__(self, app: ASGIApp, logger: FromDishka[LoggerProtocol]) -> None:
         super().__init__(app)
         self.logger = logger
@@ -30,9 +27,11 @@ class LogMiddleware(BaseHTTPMiddleware):
         body_text = body_bytes.decode("utf-8") if body_bytes else None
 
         async def receive() -> Message:
-            return {"type": "http.request",
-                    "body": body_bytes, 
-                    "more_body": False}
+            return {
+                "type": "http.request",
+                "body": body_bytes,
+                "more_body": False
+            }
 
         request = Request(request.scope, receive=receive)
 
@@ -69,7 +68,7 @@ class LogMiddleware(BaseHTTPMiddleware):
             "client_ip": request.client.host if request.client else None,
         }
 
-        nested_fields = { 
+        nested_fields = {
             "request": {
                 "headers": sanitize_headers(dict(request.headers)),
                 "body": body_text,

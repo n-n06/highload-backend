@@ -1,5 +1,7 @@
 x-common-variables: &common-variables
   POSTGRES_URL: postgresql+asyncpg://postgres:postgres@highload-backend-db-1:5432/postgres
+  LOGSTASH_HOST: logstash
+  LOGSTASH_PORT: 5044
 
 services:
   elasticsearch:
@@ -55,14 +57,31 @@ services:
     ports:
       - "5433:5432"
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redisdata:/data
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       <<: *common-variables
+<<<<<<< HEAD
     env_file:
       - .env
+=======
+      REDIS_URL: redis://redis:6379
+>>>>>>> c85b65c1dfaf87efe2d51a0c73014e54df0fac6a
     ports:
       - "8009:8009"
     volumes:
@@ -73,7 +92,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
 
 volumes:
   pgdata:
+  redisdata:
