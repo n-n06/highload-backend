@@ -3,6 +3,8 @@
 FastAPI-based ERP module that manages locations, inventory and transfer orders. Built with asynchronous SQLAlchemy, PostgreSQL, Redis-backed caching, and FastAPI Users for authentication/authorization.
 
 ---
+## Answers to Tasks
+Answers to theoretical questions are included in the `TASKS.md` file. I answered all of them in English as I found it very cumbersome to constantly switch between English and Russian keyboards. :)
 
 ## Contents
 1. [Tech Stack](#tech-stack)
