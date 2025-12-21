@@ -1,5 +1,10 @@
-from pydantic import BaseModel
+from typing import TYPE_CHECKING, Any
+
+from pydantic import BaseModel, ConfigDict
 from src.domain.value_objects.location_type import LocationType
+
+if TYPE_CHECKING:
+    from src.presentation.schemas.users import UserRead
 
 
 class LocationCreate(BaseModel):
@@ -8,11 +13,13 @@ class LocationCreate(BaseModel):
     location_type: LocationType = LocationType.WAREHOUSE
 
 class LocationRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
     address: str
     location_type: LocationType = LocationType.WAREHOUSE
-    users: list[UserRead]
+    users: list[Any] = []
 
 class BaseLocationUpdate(BaseModel):
     pass

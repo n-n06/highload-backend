@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import HTTPException, status
 
-from src.domain.entities import Location, User
-from src.application.schemas.locations import LocationCreate, BaseLocationUpdate
+from src.infrastructure.db.models.location import Location
+from src.infrastructure.db.models.user import User
+from src.presentation.schemas.locations import LocationCreate, BaseLocationUpdate
 from src.infrastructure.db.repositories.base_repo import LocationRepository
 
 
@@ -61,7 +62,6 @@ class LocationService:
             location_id: int,
             current_user: User
     ) -> dict:
-        location = await self.get_location_by_id(location_id)
         await self.location_repo.delete(location_id)
 
         return {"detail": f"Location with ID {location_id} deleted successfully."}

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-from ..value_objects.user_role import UserRole
+from ..value_objects.user_roles import UserRole
 from ..exceptions.auth_exceptions import InvalidPasswordError, PermissionDeniedError
 
 

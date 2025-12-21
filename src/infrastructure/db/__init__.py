@@ -6,6 +6,11 @@ from src.infrastructure.db.models import (
     Product,
     LocationProduct
 )
+from src.infrastructure.db.dependencies import (
+    get_engine,
+    get_async_sessionmaker,
+    get_async_session
+)
 
 __all__ = [
     "User",
@@ -14,4 +19,7 @@ __all__ = [
     "OrderProduct",
     "Product",
     "LocationProduct",
+    "get_engine",
+    "get_async_sessionmaker",
+    "get_async_session",
 ]

@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from dishka.integrations.fastapi import FromDishka, inject
 
-from src.domain.entities import User
+from src.infrastructure.db.models.user import User
 from src.presentation.schemas.orders import OrderCreate, OrderRead, OrderUpdate
 from src.application.services.orders import OrderService
 from src.presentation.dependencies import get_current_active_user
@@ -23,8 +23,7 @@ router = APIRouter(
 async def create_order(
     order_data: OrderCreate,
     service: FromDishka[OrderService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
     order = await service.create_order(
         order_data.model_dump(),
         current_user
@@ -42,8 +41,7 @@ async def get_all_orders(
     service: FromDishka[OrderService],
     offset: int = 0,
     limit: int = 20,
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
     orders = await service.get_all_orders(offset=offset, limit=limit)
     return orders
 
@@ -57,8 +55,7 @@ async def get_all_orders(
 async def get_order(
     order_id: int,
     service: FromDishka[OrderService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
     order = await service.get_order_by_id(order_id)
     return order
 
@@ -73,8 +70,7 @@ async def update_order(
     order_id: int,
     order_data: OrderUpdate,
     service: FromDishka[OrderService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
     order = await service.update_order(
         order_id,
         order_data.model_dump(exclude_unset=True),
@@ -91,7 +87,6 @@ async def update_order(
 async def delete_order(
     order_id: int,
     service: FromDishka[OrderService],
-    current_user: User = Depends(get_current_active_user)
-):
-    result = await service.delete_order(order_id, current_user)
+    ):
+    result = await service.delete_order(order_id)
     return result

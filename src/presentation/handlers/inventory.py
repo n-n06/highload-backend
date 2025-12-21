@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from dishka.integrations.fastapi import FromDishka, inject
 
-from src.domain.entities import User
+from src.infrastructure.db.models.user import User
 from src.presentation.schemas.inventory import (
     LocationProductRead,
     LocationProductCreate,
@@ -28,8 +28,7 @@ router = APIRouter(
 async def list_inventory(
     location_id: int,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
     inventory = await service.list_inventory(location_id)
     return inventory
 
@@ -44,8 +43,7 @@ async def get_inventory_entry(
     location_id: int,
     product_id: int,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
 
     entry = await service.get_inventory_entry(location_id, product_id)
     return entry
@@ -62,8 +60,7 @@ async def create_inventory_entry(
     location_id: int,
     inventory_data: LocationProductCreate,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
 
     entry = await service.create_inventory_entry(
         location_id,
@@ -84,8 +81,7 @@ async def update_inventory_entry(
     product_id: int,
     inventory_data: LocationProductUpdate,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
 
     entry = await service.update_inventory_entry(
         location_id,
@@ -106,8 +102,7 @@ async def adjust_inventory_stock(
     product_id: int,
     adjustment: StockAdjustment,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
     entry = await service.adjust_inventory_stock(
         location_id,
         product_id,
@@ -126,8 +121,7 @@ async def transfer_products(
     from_location_id: int,
     transfer_data: TransferRequest,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
 
     result = await service.transfer_products(
         from_location_id,
@@ -147,8 +141,7 @@ async def delete_inventory_entry(
     location_id: int,
     product_id: int,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
-):
+    ):
 
     result = await service.delete_inventory_entry(location_id, product_id)
     return result

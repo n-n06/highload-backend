@@ -1,16 +1,22 @@
+from typing import TYPE_CHECKING, Any
+
 from fastapi_users import schemas
-from pydantic import EmailStr
+from pydantic import EmailStr, ConfigDict
 
 from src.domain.value_objects.user_roles import UserRole
-from src.application.schemas.locations import LocationRead
+
+if TYPE_CHECKING:
+    from src.presentation.schemas.locations import LocationRead
 
 class UserRead(schemas.BaseUser[int]):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     email: EmailStr
     is_active: bool = True
     is_verified: bool = False
     role: UserRole
-    location: LocationRead | None
+    location: Any = None
 
 class UserCreate(schemas.BaseUserCreate):
     email: EmailStr  # email validation

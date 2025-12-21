@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     redis_url: RedisDsn = "redis://localhost:6379"
     LOGSTASH_HOST: str
     LOGSTASH_PORT: int
+    SECRET_KEY: str = "change-this-secret-key-in-production"
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -4,7 +4,7 @@ from fastapi import FastAPI, Response, status
 
 from src.bootstrap.di import setup_di
 from src.infrastructure.logger.middleware import LogMiddleware
-from src.presentation.handlers import router
+from src.presentation.handlers import router, setup_routers
 
 
 container = setup_di()
@@ -25,6 +25,7 @@ app.add_middleware(LogMiddleware, logger=logger)
 
 setup_dishka(container, app)
 
+setup_routers()
 app.include_router(router)
 
 

@@ -3,7 +3,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 import json
 
-from src.domain.entities import User
+from src.infrastructure.db.models.user import User
+from src.domain.protocols.logger_protocol import LoggerProtocol
 from src.infrastructure.db.models import Order, OrderProduct
 from src.infrastructure.db.repositories.base_repo import (
     OrderRepository, LocationRepository, LocationProductRepository
@@ -21,12 +22,14 @@ class OrderService:
         inventory_repo: LocationProductRepository,
         session: AsyncSession,
         redis_client: RedisClient,
+        logger: LoggerProtocol,
     ):
         self.order_repo = order_repo
         self.location_repo = location_repo
         self.inventory_repo = inventory_repo
         self.session = session
         self.redis_client = redis_client
+        self.logger = logger
 
     async def create_order(
         self,
@@ -121,7 +124,7 @@ class OrderService:
             if cached_order:
                 return json.loads(cached_order)
         except Exception as e:
-            print(f"Cache get error: {e}")
+            self.logger.error(f"Cache get error: {e}")
 
         order = await self.order_repo.get(order_id)
         if not order:
@@ -137,7 +140,7 @@ class OrderService:
                 ex=300
             )
         except Exception as e:
-            print(f"Cache set error: {e}")
+            self.logger.error(f"Cache set error: {e}")
 
         return order
 
@@ -167,7 +170,7 @@ class OrderService:
         try:
             await self.redis_client.delete(cache_key)
         except Exception as e:
-            print(f"Cache invalidation error: {e}")
+            self.logger.error(f"Cache invalidation error: {e}")
 
         return order
 

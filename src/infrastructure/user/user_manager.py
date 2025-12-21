@@ -1,9 +1,12 @@
 from typing import Any
+import logging
 from fastapi import Request
 from fastapi_users import BaseUserManager, IntegerIDMixin
 from fastapi_users.exceptions import InvalidPasswordException
 
 from src.infrastructure.db import User
+
+logger = logging.getLogger(__name__)
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -28,19 +31,19 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     async def on_after_register(
             self, user: User, request: Request | None = None
     ) -> None:
-        print(f"User {user.email} registered")
+        logger.info(f"User {user.email} registered")
 
     async def on_after_verify(
             self, user: User, request: Request | None = None
     ) -> None:
-        print(f"User {user.email} verified")
+        logger.info(f"User {user.email} verified")
 
     async def on_after_forgot_password(
             self, user: User, token: str, request: Request | None = None
     ) -> None:
-        print(f"Password reset requested for {user.email}")
+        logger.info(f"Password reset requested for {user.email}")
 
     async def on_after_reset_password(
             self, user: User, request: Request | None = None
     ) -> None:
-        print(f"Password reset for {user.email}")
+        logger.info(f"Password reset for {user.email}")

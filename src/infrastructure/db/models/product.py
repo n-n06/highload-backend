@@ -1,18 +1,18 @@
-from sqlalchemy import Column, Integer, String, CheckConstraint
-from sqlalchemy.orm import relationship
+from typing import Optional
+from sqlalchemy import String, CheckConstraint
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 from src.infrastructure.db.models.base import Base
 
 class Product(Base):
     __tablename__ = "products"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
-    description = Column(String, nullable=True)
-    stock = Column(Integer, default=0)
-    threshold = Column(Integer, default=0)  # managers can define the limit for the product
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    stock: Mapped[int] = mapped_column(default=0)
+    threshold: Mapped[int] = mapped_column(default=0)
 
-    # Relationships
-    locations = relationship("LocationProduct", back_populates="product")
+    locations: Mapped[list["LocationProduct"]] = relationship("LocationProduct", back_populates="product")
 
     __table_args__ = (
         CheckConstraint("stock >= 0", name="check_stock_ge_0"),
