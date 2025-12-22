@@ -2,7 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from dishka.integrations.fastapi import FromDishka, inject
 
-from src.domain.entities import User
+from src.domain.value_objects.user_roles import UserRole
+from src.infrastructure.db.models.user import User
+from src.presentation.dependencies import has_permissions, get_current_active_user
 from src.presentation.schemas.inventory import (
     LocationProductRead,
     LocationProductCreate,
@@ -11,7 +13,6 @@ from src.presentation.schemas.inventory import (
     TransferRequest
 )
 from src.application.services.inventory import InventoryService
-from src.presentation.dependencies import get_current_active_user
 
 router = APIRouter(
     prefix="/inventory",
@@ -28,10 +29,10 @@ router = APIRouter(
 async def list_inventory(
     location_id: int,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user)
 ):
-    inventory = await service.list_inventory(location_id)
-    return inventory
+    entries = await service.list_inventory(location_id)
+    return [LocationProductRead.from_orm(e) for e in entries]
 
 
 @router.get(
@@ -44,11 +45,10 @@ async def get_inventory_entry(
     location_id: int,
     product_id: int,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user)
 ):
-
     entry = await service.get_inventory_entry(location_id, product_id)
-    return entry
+    return LocationProductRead.from_orm(entry)
 
 
 @router.post(
@@ -60,17 +60,13 @@ async def get_inventory_entry(
 @inject
 async def create_inventory_entry(
     location_id: int,
-    inventory_data: LocationProductCreate,
+    payload: LocationProductCreate,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.SALESMAN, UserRole.ADMIN]))
 ):
-
-    entry = await service.create_inventory_entry(
-        location_id,
-        inventory_data.product_id,
-        inventory_data.quantity
-    )
-    return entry
+    entry = await service.create_inventory_entry(location_id, payload)
+    return LocationProductRead.from_orm(entry)
 
 
 @router.put(
@@ -82,17 +78,13 @@ async def create_inventory_entry(
 async def update_inventory_entry(
     location_id: int,
     product_id: int,
-    inventory_data: LocationProductUpdate,
+    payload: LocationProductUpdate,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.SALESMAN, UserRole.ADMIN]))
 ):
-
-    entry = await service.update_inventory_entry(
-        location_id,
-        product_id,
-        inventory_data.quantity
-    )
-    return entry
+    entry = await service.upsert_inventory_entry(location_id, product_id, payload)
+    return LocationProductRead.from_orm(entry)
 
 
 @router.post(
@@ -106,14 +98,11 @@ async def adjust_inventory_stock(
     product_id: int,
     adjustment: StockAdjustment,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.SALESMAN, UserRole.ADMIN]))
 ):
-    entry = await service.adjust_inventory_stock(
-        location_id,
-        product_id,
-        adjustment.delta
-    )
-    return entry
+    entry = await service.adjust_inventory(location_id, product_id, adjustment)
+    return LocationProductRead.from_orm(entry)
 
 
 @router.post(
@@ -124,16 +113,12 @@ async def adjust_inventory_stock(
 @inject
 async def transfer_products(
     from_location_id: int,
-    transfer_data: TransferRequest,
+    payload: TransferRequest,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.SALESMAN, UserRole.ADMIN]))
 ):
-
-    result = await service.transfer_products(
-        from_location_id,
-        transfer_data.to_location_id,
-        [item.model_dump() for item in transfer_data.items]
-    )
+    result = await service.transfer_inventory(from_location_id, payload)
     return result
 
 
@@ -147,8 +132,8 @@ async def delete_inventory_entry(
     location_id: int,
     product_id: int,
     service: FromDishka[InventoryService],
-    current_user: User = Depends(get_current_active_user)
+    user: User = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.SALESMAN, UserRole.ADMIN]))
 ):
-
     result = await service.delete_inventory_entry(location_id, product_id)
     return result

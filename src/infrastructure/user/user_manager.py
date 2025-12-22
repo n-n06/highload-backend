@@ -1,21 +1,29 @@
-from fastapi import Request, Depends
+from typing import Any
+import logging
+from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, IntegerIDMixin
 from fastapi_users.db import SQLAlchemyUserDatabase
 from fastapi_users.exceptions import InvalidPasswordException
 
+from src.infrastructure.db import User
+from src.infrastructure.db.dependencies import get_user_db
 from src.bootstrap.config import settings
-from src.infrastructure.db.models.user import User
-from src.infrastructure.user.user_db import get_user_db
-from src.presentation.schemas.users import UserCreate
+
+logger = logging.getLogger(__name__)
+
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
-    def __init__(self, user_db):
+    def __init__(
+        self, 
+        user_db, 
+        reset_password_token_secret: str = settings.SECRET_KEY, 
+        verification_token_secret: str = settings.SECRET_KEY
+    ):
         super().__init__(user_db)
-        self.reset_password_token_secret = settings.SECRET
-        self.verification_token_secret = settings.SECRET
-
+        self.reset_password_token_secret = reset_password_token_secret
+        self.verification_token_secret = verification_token_secret
 
     async def create_superuser(
             self,
@@ -23,60 +31,32 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
             safe: bool = False
     ) -> User:
 
-        user_create_dict["is_superuser"] = True
         user_create_dict["role"] = "admin"
         user = await self.create(User(**user_create_dict), safe)
         return user
 
 
-    async def validate_password(
-            self, 
-            password: str, 
-            user: UserCreate | User
-    ) -> None:
-        if len(password) < 8:
-            raise InvalidPasswordException(
-                reason="Password should be at least 8 characters long!"
-            )
-        if user.email.lower() in password.lower():
-            raise InvalidPasswordException(
-                reason="Password should not contain the email"
-            )
-        if any((
-            password.isalpha(),
-            password.islower(),
-            password.isupper(),
-            password.isnumeric(),
-            password.isspace(),
-        )):
-            raise InvalidPasswordException(
-                reason="Password should contain a mix of uppercase " + 
-                " and lowercase letters, numbers and symbols"
-            )
-
-
     async def on_after_register(
             self, user: User, request: Request | None = None
     ) -> None:
-        print(f"User {user.email} registered")
+        logger.info(f"User {user.email} registered")
 
     async def on_after_verify(
             self, user: User, request: Request | None = None
     ) -> None:
-        print(f"User {user.email} verified")
+        logger.info(f"User {user.email} verified")
 
     async def on_after_forgot_password(
             self, user: User, token: str, request: Request | None = None
     ) -> None:
-        print(f"Password reset requested for {user.email}")
+        logger.info(f"Password reset requested for {user.email}")
 
     async def on_after_reset_password(
             self, user: User, request: Request | None = None
     ) -> None:
-        print(f"Password reset for {user.email}")
+        logger.info(f"Password reset for {user.email}")
 
 
-# get user manager
 async def get_user_manager(
         user_db: SQLAlchemyUserDatabase = Depends(get_user_db)
 ):

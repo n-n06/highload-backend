@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional
-from ..value_objects.user_role import UserRole
-from ..exceptions.auth_exceptions import InvalidPasswordError, PermissionDeniedError
 
+# from fastapi_users.exceptions import InvalidPasswordException
+from src.domain.exceptions.auth_exceptions import PermissionDeniedError
+from src.domain.value_objects.user_roles import UserRole
 
 @dataclass
 class User:

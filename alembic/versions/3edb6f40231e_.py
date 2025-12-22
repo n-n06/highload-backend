@@ -1,17 +1,19 @@
-"""fix relationships
+"""empty message
 
-Revision ID: c38bd650e864
-Revises: 60bc84c05dc2
-Create Date: 2025-09-25 23:41:08.193906
+Revision ID: 3edb6f40231e
+Revises: a0905fecb1da
+Create Date: 2025-12-22 06:04:34.541475
 
 """
 from typing import Sequence, Union
 
+from alembic import op
+import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c38bd650e864'
-down_revision: Union[str, Sequence[str], None] = '60bc84c05dc2'
+revision: str = '3edb6f40231e'
+down_revision: Union[str, Sequence[str], None] = 'a0905fecb1da'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -6,9 +6,9 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.jwt import generate_jwt
 
+from src.bootstrap.config import settings
 from src.infrastructure.db.models.user import User
 from src.infrastructure.user.user_manager import get_user_manager
-from src.bootstrap.config import settings
 
 bearer_transport = BearerTransport(tokenUrl="auth/login")
 
@@ -38,7 +38,7 @@ class CustomJWTStrategy(JWTStrategy):
 
 def get_jwt_strategy() -> JWTStrategy:
     return CustomJWTStrategy(
-        secret=settings.SECRET, 
+        secret=settings.SECRET_KEY, 
         lifetime_seconds=3600
     )
 
@@ -53,5 +53,4 @@ auth_backend = AuthenticationBackend(
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager, [auth_backend]
 )
-
 

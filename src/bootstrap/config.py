@@ -7,13 +7,16 @@ class Settings(BaseSettings):
     redis_url: RedisDsn = "redis://localhost:6379"
     LOGSTASH_HOST: str
     LOGSTASH_PORT: int
-    SECRET: str
+    SECRET_KEY: str
 
     DB_HOST: str
     DB_PORT: int
     DB_NAME: str
     DB_USER: str
     DB_PASS: str
+
+    ADMIN_EMAIL: str
+    ADMIN_PASS: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -5,5 +5,5 @@ class Product:
     id: int
     name: str
     description: str
-    stock: int
-    threshold: int
+    # stock: int
+    # threshold: int

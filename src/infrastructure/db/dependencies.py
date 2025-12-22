@@ -1,5 +1,7 @@
-from collections.abc import AsyncGenerator, AsyncIterable
+from collections.abc import AsyncGenerator
 
+from fastapi import Depends
+from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -8,30 +10,28 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.bootstrap.config import settings
+from src.infrastructure.db.models.user import User
 
 
-async def get_engine() -> AsyncGenerator[AsyncEngine]:
-    engine = create_async_engine(
-        str(settings.postgres_url),
-        future=True,
-    )
-    yield engine
-    await engine.dispose()
+engine: AsyncEngine = create_async_engine(
+    str(settings.postgres_url),
+    future=True,
+    pool_pre_ping=True,
+)
 
 
-async def get_async_sessionmaker(
-    engine: AsyncEngine,
-) -> async_sessionmaker[AsyncSession]:
-    session_factory = async_sessionmaker(
-        engine,
-        expire_on_commit=False,
-        class_=AsyncSession,
-    )
-    return session_factory
+async_session_maker = async_sessionmaker(
+    engine,
+    expire_on_commit=False,
+    class_=AsyncSession,
+)
 
 
-async def get_async_session(
-    session_factory: async_sessionmaker[AsyncSession],
-) -> AsyncIterable[AsyncSession]:
-    async with session_factory() as session:
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session_maker() as session:
         yield session
+
+async def get_user_db(
+    session: AsyncSession = Depends(get_async_session),
+) -> AsyncGenerator[SQLAlchemyUserDatabase, None]:
+    yield SQLAlchemyUserDatabase(session, User)

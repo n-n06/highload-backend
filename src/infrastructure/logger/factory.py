@@ -5,7 +5,7 @@ from src.domain.protocols.logger_protocol import LoggerProtocol
 
 def create_logger(
     name: str = "highload-backend-app",
-    logstash_host: str = "localhost",
+    logstash_host: str = "logstash",
     logstash_port: int = 5000,
     level: int = logging.INFO
 ) -> LoggerProtocol:

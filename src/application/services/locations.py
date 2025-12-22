@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 
 from src.domain.entities import Location, User
 from src.infrastructure.db.repositories.base_repo import LocationRepository
-from src.presentation.schemas.locations import BaseLocationUpdate, LocationCreate
+from src.presentation.schemas.locations import BaseLocationUpdate, LocationCreate, LocationRead
 
 
 class LocationService:
@@ -28,7 +28,7 @@ class LocationService:
     async def get_all_locations(self) -> List[Location]:
         return await self.location_repo.list()
 
-    async def get_location_by_id(self, location_id: int) -> Location:
+    async def get_location_by_id(self, location_id: int) -> LocationRead:
         location = await self.location_repo.get(location_id)
 
         if not location:
@@ -51,7 +51,7 @@ class LocationService:
         for key, value in update_data.items():
             setattr(location, key, value)
 
-        updated_location = await self.location_repo.update(location)
+        updated_location = await self.location_repo.update(location.id, location_data)
         return updated_location
 
 

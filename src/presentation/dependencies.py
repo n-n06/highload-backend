@@ -1,49 +1,50 @@
-
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from src.infrastructure.db.dependencies import get_async_session
-from src.infrastructure.db.models.user import User
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+import jwt
 
 
-async def get_current_user():...
-
-async def get_current_active_user(
-    current_user: User = Depends(get_current_user)
-) -> User:
-
-    if not current_user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User is not active"
-        )
-    return current_user
+from src.infrastructure.user.jwt_strategies import fastapi_users
+from src.domain.value_objects import UserRole
+from src.bootstrap.config import settings
 
 
-async def get_current_superuser(
-    current_user: User = Depends(get_current_active_user)
-) -> User:
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User does not have superuser privileges"
-        )
-    return current_user
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
-def require_role(required_role: str):
+# checks for logger in active user
+get_current_active_user = fastapi_users.current_user(active=True)
 
-    async def role_checker(
-        current_user: User = Depends(get_current_active_user)
-    ) -> User:
-        if current_user.role != required_role:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"User does not have required role: {required_role}"
+# checks user permissions
+def has_permissions(required_roles: list[UserRole]):
+    
+    async def validate_permission(token: str = Depends(oauth2_scheme)):
+
+        try:
+            payload = jwt.decode(
+                jwt=token, key=settings.SECRET_KEY, 
+                algorithms=["HS256"], audience=['fastapi-users:auth']
             )
-        return current_user
+            user_role: str = payload.get("role")
 
-    return role_checker
+            if not user_role:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, 
+                    detail="Missing role in token"
+                )
+
+            if user_role not in [role.value for role in required_roles]:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Permissions denied",
+                )
+            
+            return payload
+        except jwt.DecodeError as e:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail=f"Invalid token: {e}",
+            )
+    
+    return validate_permission
+

@@ -2,16 +2,16 @@ from typing import List
 from fastapi import APIRouter, Depends, status
 from dishka.integrations.fastapi import FromDishka, inject
 
-from src.domain.entities import User
 from src.domain.value_objects.user_roles import UserRole
 from src.presentation.schemas.locations import LocationCreate, BaseLocationUpdate, LocationRead
 from src.application.services.locations import LocationService
-from src.infrastructure.user.dependencies import get_current_active_user, has_permissions
+from src.presentation.dependencies import get_current_active_user, has_permissions
 
 router = APIRouter(
     prefix="/locations",
     tags=["locations"]
 )
+
 
 @router.post(
     "/",
@@ -21,13 +21,12 @@ router = APIRouter(
 )
 @inject
 async def create_location(
-        location_data: LocationCreate,
-        service: FromDishka[LocationService],
-        permissions=Depends(has_permissions([UserRole.ADMIN])),
-        current_user: User = Depends(get_current_active_user)
+    location_data: LocationCreate,
+    service: FromDishka[LocationService],
+    user = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.ADMIN]))
 ):
-
-    location = await service.create_location(location_data, current_user)
+    location = await service.create_location(location_data, user)
     return location
 
 
@@ -38,7 +37,8 @@ async def create_location(
 )
 @inject
 async def get_all_locations(
-        service: FromDishka[LocationService]
+    service: FromDishka[LocationService],
+    user = Depends(get_current_active_user),
 ):
     locations = await service.get_all_locations()
     return locations
@@ -51,8 +51,9 @@ async def get_all_locations(
 )
 @inject
 async def get_location(
-        location_id: int,
-        service: FromDishka[LocationService]
+    location_id: int,
+    service: FromDishka[LocationService],
+    user = Depends(get_current_active_user),
 ):
     location = await service.get_location_by_id(location_id)
     return location
@@ -65,16 +66,13 @@ async def get_location(
 )
 @inject
 async def update_location(
-        location_id: int,
-        location_data: BaseLocationUpdate,
-        service: FromDishka[LocationService],
-        current_user: User = Depends(get_current_active_user),
-        permissions=Depends(has_permissions([UserRole.ADMIN]))
+    location_id: int,
+    location_data: BaseLocationUpdate,
+    service: FromDishka[LocationService],
+    user = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.MANAGER, UserRole.ADMIN]))
 ):
-    # Authorization check
-    # LocationAuthorizationService.require_manager(current_user)
-
-    location = await service.update_location(location_id, location_data, current_user)
+    location = await service.update_location(location_id, location_data, user)
     return location
 
 
@@ -85,13 +83,10 @@ async def update_location(
 )
 @inject
 async def delete_location(
-        location_id: int,
-        service: FromDishka[LocationService],
-        current_user: User = Depends(get_current_active_user),
-        permissions=Depends(has_permissions([UserRole.ADMIN]))
+    location_id: int,
+    service: FromDishka[LocationService],
+    user = Depends(get_current_active_user),
+    permissions = Depends(has_permissions([UserRole.ADMIN]))
 ):
-    # Authorization check
-    # LocationAuthorizationService.require_superuser(current_user)
-
-    result = await service.delete_location(location_id, current_user)
+    result = await service.delete_location(location_id, user)
     return result

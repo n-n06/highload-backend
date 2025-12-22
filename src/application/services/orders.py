@@ -64,7 +64,7 @@ class OrderService:
             delivery_guy_id=order_data.get('delivery_guy_id'),
             location_from_id=order_data['location_from_id'],
             location_to_id=order_data['location_to_id'],
-            status=order_data.get('status', 'pending')
+            status=order_data.get('status', 'pending').upper()
         )
 
         self.session.add(order)

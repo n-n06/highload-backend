@@ -1,11 +1,15 @@
 from pydantic import BaseModel
 
+class ProductCreate(BaseModel):
+    name: str
+    description: str
+
 class ProductRead(BaseModel):
     id: int
     name: str
     description: str
-    stock: int = 0
-    threshold: int = 0
+    # stock: int = 0
+    # threshold: int = 0
 
 class BaseProductUpdate(BaseModel):
     pass
@@ -13,11 +17,7 @@ class BaseProductUpdate(BaseModel):
 class ProductUpdate(BaseProductUpdate):
     name: str
     description: str
-    stock: int
-    threshold: int
 
 class ProductPartUpdate(BaseProductUpdate):
     name: str | None = None
     description: str | None = None
-    stock: int | None = None
-    threshold: int | None = None

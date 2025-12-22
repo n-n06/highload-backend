@@ -1,9 +1,10 @@
 
-from taskiq_redis import RedisAsyncBroker
+from taskiq_redis import ListQueueBroker
 
 from src.bootstrap.config import settings
 
-broker = RedisAsyncBroker(
+
+broker = ListQueueBroker(
     url=str(settings.redis_url),
 
     result_backend=None,

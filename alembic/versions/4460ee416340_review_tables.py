@@ -1,17 +1,19 @@
-"""remove order 
+"""review tables
 
-Revision ID: 60bc84c05dc2
-Revises: b38424610a87
-Create Date: 2025-09-25 23:35:14.592614
+Revision ID: 4460ee416340
+Revises: 
+Create Date: 2025-12-22 04:34:12.287628
 
 """
 from typing import Sequence, Union
 
+from alembic import op
+import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '60bc84c05dc2'
-down_revision: Union[str, Sequence[str], None] = 'b38424610a87'
+revision: str = '4460ee416340'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
